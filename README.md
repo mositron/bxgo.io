@@ -1,7 +1,9 @@
 # BXGo.io
 โปรแกรมแสดงราคาเหรียญ BTC ETH DASH XRP OMG และซื้อขายบนเว็บ bx.in.th อัตโนมัติ   
-  
+
 โปรแกรมนี้พัฒนาด้วยภาษา GO ซึ่งสามารถ compile เพื่อนำไปใช้งานได้ทั้ง Windows, macOS และ Linux หรือจะเรียกใช้งานผ่าน Docker ได้ที่ positron/bxgo.io(เร็วๆนี้)
+
+ดาวน์โหลด โปรแกรมพร้อมใช้ หรือ source code ได้ที่หน้า [https://github.com/positronth/bxgo.io/releases](https://github.com/positronth/bxgo.io/releases)
 
 ### ตัวอย่าง
 [https://bxgo.io/](https://bxgo.io/)
