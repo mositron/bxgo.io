@@ -6,13 +6,13 @@
 ## Download
 ดาวน์โหลด โปรแกรมพร้อมใช้ หรือ source code ได้ที่หน้า [https://github.com/positronth/bxgo.io/releases](https://github.com/positronth/bxgo.io/releases)
 
-### ตัวอย่าง
+## ตัวอย่าง
 [https://bxgo.io/](https://bxgo.io/)
 
 ![Screenshot](https://github.com/positronth/bxgo.io/raw/master/theme/default/img/screenshot.png)  
 
 
-### config.ini
+## config.ini
 ในการติดตั้งครั้งแรก จะต้องเพิ่มค่าคอนฟิคให้โปรแกรมคือ  
 key + secret ---- ได้จากการสร้างคีย์ใหม่ใน   https://bx.in.th/account  
 pass ---- รหัสอะไรก็ได้ สำหรับการยืนยันการสั่งลบการซื้อขาย  
