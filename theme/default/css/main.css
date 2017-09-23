@@ -45,6 +45,7 @@ em span{color:#999;}
 
 #body{padding:20px 15px;border-bottom:1px solid #111;}
 #ui>.row{margin:0px;}
-#footer{background:#141414;border-top:1px solid #1c1c1c;color:#444;}
-#footer>div{padding:10px 15px 5px;}
+#footer{background:#141414;border-top:1px solid #1c1c1c;color:#444;font-size:12px;}
+#footer>div{padding:20px 15px 15px;}
+#footer h5{font-size:14px;margin:0px;color:#666;text-shadow:1px 1px 1px #000;}
 #footer a{color:#555;}
