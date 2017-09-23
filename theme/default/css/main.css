@@ -43,8 +43,8 @@ em span{color:#999;}
 .fee td{color:#7a675b !important;}
 .deposit td{color:#6f5b7a !important;}
 
-#body{padding:15px 10px;border-bottom:1px solid #111;}
+#body{padding:20px 15px;border-bottom:1px solid #111;}
 #ui>.row{margin:0px;}
 #footer{background:#141414;border-top:1px solid #1c1c1c;color:#444;}
-#footer>div{padding:10px 10px 5px;}
+#footer>div{padding:10px 15px 5px;}
 #footer a{color:#555;}
