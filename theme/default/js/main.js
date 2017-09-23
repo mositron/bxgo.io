@@ -18,16 +18,16 @@ function network(s){
     t.addClass('active');
   }
 }
-function sendcancel(t){
-  $('#delorder').modal('hide');
+function sendorder(t){
+  $('#order_modal').modal('hide');
   $.getJSON(
-    server+'/ajax/cancel?pair='+pair+'&id='+t.id.value+'&cancel='+t.cancel.value+'&callback=?',
+    server+'/ajax/order?pair='+pair+'&action='+t.action.value+'&id='+t.id.value+'&pass='+t.password.value+'&callback=?',
     function(da){
-      $('#order').popover({
+      $(da.target).popover({
         title:(da.success?'สำเร็จ':'ผิดพลาด'),
         content:da.message,
       }).popover('show');
-      setTimeout(function(){$('#order').popover('dispose');},5000);
+      setTimeout(function(){$(da.target).popover('dispose');},5000);
     }
   );
 }
@@ -118,7 +118,7 @@ function _getData(){
       var tmp='',si;
       $.each(data.order,function(k,v){
         si=_sim(v.order_type,v.rate,v.amount)
-        tmp+='<tr class="'+v.order_type+'"><td>'+v.order_type+'</td><td>'+_num(_fs(v.rate))+' <em>('+(v.order_type=='sell'?'<span class="red2">+'+_num(_fs(v.rate-data.pair.last_price))+'</span>':'<span class="green2">'+_num(_fs(v.rate-data.pair.last_price))+'</span>')+')</em></td><td>'+_num(v.amount)+'</td><td>'+v.date+'</td><td>'+si.do+'</td><td>'+si.profit+'</td><td width="20px"><button type="button" class="btn btn-dark" data-toggle="modal" data-target="#delorder" data-id="'+v.order_id+'">X</button></td></tr>';
+        tmp+='<tr class="'+v.order_type+'"><td>'+v.order_type+'</td><td>'+_num(_fs(v.rate))+' <em>('+(v.order_type=='sell'?'<span class="red2">+'+_num(_fs(v.rate-data.pair.last_price))+'</span>':'<span class="green2">'+_num(_fs(v.rate-data.pair.last_price))+'</span>')+')</em></td><td>'+_num(v.amount)+'</td><td>'+v.date+'</td><td>'+si.do+'</td><td>'+si.profit+'</td><td width="20px"><button type="button" class="btn btn-dark" data-toggle="modal" data-target="#order_modal" data-action="cancel" data-id="'+v.order_id+'">X</button></td></tr>';
       });
       $('#order').html(tmp);
       $('#order_count').html('buy: '+$('#order>tr.buy').length+' / sell: '+$('#order>tr.sell').length);
@@ -146,7 +146,7 @@ function _getData(){
 
       var tmp='';
       $.each(data.sims,function(k,v){
-        tmp+='<tr><td class="'+(v.Order_Buy?'in':'out')+'order">'+_num(_fs(v.Buy))+' '+currency+(v.Order_Buy?' (order:'+_num(_fs(v.Order_Buy))+')':'')+'</td><td class="'+(v.Order_Sell?'in':'out')+'order">'+_num(_fs(v.Sell))+' '+currency+(v.Order_Sell?' (order:'+_num(_fs(v.Order_Sell))+')':'')+'</td><td>'+_num(_fs(v.Margin))+' '+currency+'</td><td>'+_num(v.Coin.toFixed(8))+' '+data.pair.secondary_currency+'</td><td>'+_num(_fs(v.Profit))+' '+currency+'</td><td>'+_num(_fs(v.Diff))+' '+currency+'</td></tr>';
+        tmp+='<tr><td class="'+(v.Order_Buy?'in':'out')+'order">'+_num(_fs(v.Buy))+' '+currency+(v.Order_Buy?' (order:'+_num(_fs(v.Order_Buy))+')':'')+'</td><td class="'+(v.Order_Sell?'in':'out')+'order">'+_num(_fs(v.Sell))+' '+currency+(v.Order_Sell?' (order:'+_num(_fs(v.Order_Sell))+')':'')+'</td><td>'+_num(_fs(v.Margin))+' '+currency+'</td><td>'+_num(v.Coin.toFixed(8))+' '+data.pair.secondary_currency+'</td><td>'+_num(_fs(v.Profit))+' '+currency+'</td><td>'+_num(_fs(v.Margin))+' '+currency+'</td></tr>';
       });
       $('#sims').html(tmp);
 
@@ -159,7 +159,7 @@ function _getData(){
       {
         tmp.push('sell: '+data.delay.Next_Sell);
       }
-      $('#delay').html(tmp.length>0?'Delay for next - '+tmp.join(', '):'');
+      $('#delay').html((tmp.length>0?'Delay for next - '+tmp.join(', '):'')+' <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#order_modal" data-action="config">R</button>');
       if(!loaded)
       {
         loaded=true;
@@ -255,18 +255,13 @@ var nav = {
     if((uri[1]==next[1])||((!next[11])&&(next[13]==uri[13])))
     {
       if(e)e.preventDefault();
-      console.log('same url');
-      //same url - ajax with replaceState
       history.replaceState({url:next[13]}, null, href);
       network(next[13])
       return false;
-
     }
     else if((!next[11])||((next[11])&&(next[11]==uri[11])))
     {
       if(e)e.preventDefault();
-      console.log('same domain');
-      //same domain - ajax with pushstate
       history.pushState({url:next[13]}, null, href);
       network(next[13])
       return false;
@@ -276,7 +271,6 @@ var nav = {
       console.log('not e');
       window.location.href=href;
     }
-    //else # no origin - full page load
   },
   popstate:function(e)
   {
@@ -289,9 +283,16 @@ $(window).on('popstate',function(e){nav.popstate(e);});
 $(function(){
   tmr = setInterval(_getData,delay*1000)
   _getData();
-  $('#delorder').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget);
-    $('#order_id').val(button.data('id'));
+  $('#order_modal').on('show.bs.modal', function (event) {
+    var btn = $(event.relatedTarget);
+    if(btn.data('action')=='cancel'){
+      $('#order_title').html('ลบคำสั่งซื่อ/ขาย');
+      $('#order_id').val(btn.data('id'));
+    }
+    else if(btn.data('action')=='config'){
+      $('#order_title').html('Reload config.ini');
+    }
+    $('#order_action').val(btn.data('action'));
   });
   nav.load();
 })

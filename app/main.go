@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-	VERSION = "0.4.5"
+	VERSION = "0.4.6"
 	log.SetFlags(0)
 	LoadIni()
-	if api_key == "" || api_secret == "" {
-		_tn("set api_key/api_secret.")
+	if Conf.Key == "" || Conf.Secret == "" {
+		_tn("set Conf.Key/Conf.Secret.")
 		for {
 			time.Sleep(time.Second)
 		}
@@ -29,18 +29,18 @@ func main() {
 		n++
 	}
 
-	if api_port > 0 {
+	if Conf.Port > 0 {
 		w := Http{}
 		go func() {
-			w.Listen(api_port)
+			w.Listen(Conf.Port)
 		}()
 	}
 
 	_tn("\n", _r("#", 53))
 	_tn("BXGo v. ", VERSION)
 	_tn("Time: " + time.Now().Format(time.Stamp))
-	if api_port > 0 {
-		_tn("Web Listen: ", _is(api_port))
+	if Conf.Port > 0 {
+		_tn("Web Listen: ", _is(Conf.Port))
 	}
 	_tn(_r("#", 53))
 
@@ -125,6 +125,9 @@ func main() {
 		if Delay.Refresh_Pair > 0 {
 			Delay.Refresh_Pair--
 		}
+		if Delay.Next_BuySell > 0 {
+			Delay.Next_BuySell--
+		}
 		iu := use
 		if use > 1000 {
 			use = 100
@@ -152,6 +155,9 @@ func process(pair int64) {
 		p = ((100 / (Bot[pair].Conf.Margin + 100)) * pc)
 	} else {
 		p = ((100 / ((Bot[pair].Conf.Margin / 2) + 100)) * Bot[pair].Pair.Price)
+		if p > Bot[pair].Conf.Max_Price {
+			p = ((100 / (Bot[pair].Conf.Margin + 100)) * Bot[pair].Pair.Price)
+		}
 	}
 
 	if p > Bot[pair].Pair.Price {
@@ -165,8 +171,8 @@ func process(pair int64) {
 		if sim.Buy > 0 && sim.Sell > 0 {
 			Bot[pair].Sims = append(Bot[pair].Sims, sim)
 			p = sim.Buy - sim.Diff
-			if i == 0 && Bot[pair].Conf.Enable {
-				if Bot[pair].Delay.Next_Buy == 0 && Bot[pair].Conf.Budget > 0 && sim.Buy > 0 && (Bot[pair].Conf.Max_Price >= sim.Buy || Bot[pair].Conf.Max_Price == 0) && (sim.Buy+sim.Diff > Bot[pair].Pair.Price) {
+			if i == 0 && Bot[pair].Conf.Enable && Delay.Next_BuySell == 0 && Bot[pair].Delay.Next_Buy == 0 {
+				if Bot[pair].Conf.Budget > 0 && sim.Buy > 0 && (Bot[pair].Conf.Max_Price >= sim.Buy || Bot[pair].Conf.Max_Price == 0) && (sim.Buy+sim.Margin >= Bot[pair].Pair.Price) {
 					if int64(len(Bot[pair].Order)) < Bot[pair].Conf.Max_Order {
 						keep := 0.0
 						/*
@@ -174,11 +180,11 @@ func process(pair int64) {
 								keep = v
 							}
 						*/
-						if G_Balance[Bot[pair].Pair.Primary].Available-Bot[pair].Conf.Budget >= keep {
-							if Bot[pair].Conf.Budget <= G_Balance[Bot[pair].Pair.Primary].Available {
+						if Balance[Bot[pair].Pair.Primary].Available-Bot[pair].Conf.Budget >= keep {
+							if Bot[pair].Conf.Budget <= Balance[Bot[pair].Pair.Primary].Available {
 								if sim.Order_Buy == 0 && sim.Order_Sell == 0 {
-									_tn(time.Now().Format(time.Stamp)+" : send buy - ", _fs(Bot[pair].Conf.Budget), " <= ", _fs(G_Balance[Bot[pair].Pair.Primary].Available), " - rate: ", _fs(_price(pair, sim.Buy)))
-									_tn("price = ", _fs(Bot[pair].Pair.Price), " , ")
+									_tn(time.Now().Format(time.Stamp)+" : send buy - ", _fs(Bot[pair].Conf.Budget), " <= ", _fs(Balance[Bot[pair].Pair.Primary].Available), " - rate: ", _fs(_price(pair, sim.Buy)))
+									_tn(Bot[pair].Pair.Secondary, " - price = ", _fs(Bot[pair].Pair.Price))
 									api_buy(pair, Bot[pair].Conf.Budget, _price(pair, sim.Buy))
 								}
 							}
@@ -189,15 +195,15 @@ func process(pair int64) {
 		}
 	}
 
-	if Bot[pair].Conf.Enable && Bot[pair].Delay.Next_Sell == 0 && Bot[pair].Pair.Price > 0 && int64(len(Bot[pair].Order)) < Bot[pair].Conf.Max_Order && G_Balance[Bot[pair].Pair.Secondary].Available > 0 {
-		keep := 0.0
+	if Bot[pair].Conf.Enable && Delay.Next_BuySell == 0 && Bot[pair].Delay.Next_Sell == 0 && Bot[pair].Pair.Price > 0 && int64(len(Bot[pair].Order)) < Bot[pair].Conf.Max_Order && Balance[Bot[pair].Pair.Secondary].Available > 0 {
+		keep := 0.002
 		/*
 			if v, ok := Conf.KEEP[Pair.Secondary]; ok {
 				keep = v
 			}
 		*/
-		if G_Balance[Bot[pair].Pair.Secondary].Available > keep {
-			sell := G_Balance[Bot[pair].Pair.Secondary].Available - keep
+		if Balance[Bot[pair].Pair.Secondary].Available > keep {
+			sell := Balance[Bot[pair].Pair.Secondary].Available - keep
 			if sell > 0 {
 				sim := _calc(pair, Bot[pair].Pair.Price)
 				rate := sim.Sell
@@ -205,7 +211,7 @@ func process(pair int64) {
 					rate = Bot[pair].Pair.Price
 				}
 				_tn(time.Now().Format(time.Stamp)+" : send sell - ", _fs(sell), " - rate: ", _fs(_price(pair, rate)))
-				_tn("price = ", _fs(Bot[pair].Pair.Price), " , ")
+				_tn(Bot[pair].Pair.Secondary, " - price = ", _fs(Bot[pair].Pair.Price))
 				api_sell(pair, sell, _price(pair, rate))
 			}
 		}

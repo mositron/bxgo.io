@@ -25,25 +25,36 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if pair, err := strconv.ParseInt(r.URL.Query().Get("pair"), 10, 64); err == nil && pair > 0 {
 			if len(url) == 2 {
 				ajax := make(map[string]interface{})
-				if url[1] == "cancel" {
+				if url[1] == "order" {
 					success := false
-					message := "รหัสสำหรับการลบ หรือ ไอดีของข้อมูลไม่ถูกต้อง"
-					cancel := r.URL.Query().Get("cancel")
-					if id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64); err == nil && id > 0 {
-						if cancel != "" && cancel == api_pass {
-							for i := range Bot[pair].Order {
-								if Bot[pair].Order[i].ID == id {
-									success = true
-									message = "ลบคำสั่งเรียบร้อยแล้ว... กรุณารอซักครู่เพื่ออัพเดทข้อมูล."
-									Bot[pair].Order = append(Bot[pair].Order[:i], Bot[pair].Order[i+1:]...)
-									api_cancel(pair, id)
-									break
+					message := "รหัสสำหรับคำสั่งไม่ถูกต้อง"
+					target := ".navbar-brand"
+					action := r.URL.Query().Get("action")
+					password := r.URL.Query().Get("pass")
+					if password != "" && password == Conf.Pass {
+						if action == "cancel" {
+							if id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64); err == nil && id > 0 {
+								for i := range Bot[pair].Order {
+									if Bot[pair].Order[i].ID == id {
+										target = "#order"
+										success = true
+										message = "ลบคำสั่งเรียบร้อยแล้ว... กรุณารอซักครู่เพื่ออัพเดทข้อมูล."
+										Bot[pair].Order = append(Bot[pair].Order[:i], Bot[pair].Order[i+1:]...)
+										api_cancel(pair, id)
+										break
+									}
 								}
 							}
+						} else if action == "config" {
+							LoadIni()
+							target = "#delay"
+							success = true
+							message = "รีโหลดเรียบร้อยแล้ว... กรุณารอซักครู่เพื่ออัพเดทข้อมูล."
 						}
 					}
 					ajax["success"] = success
 					ajax["message"] = message
+					ajax["target"] = target
 				} else if url[1] == "data" {
 					list := map[string]AList{}
 					for i := range Bot {
@@ -57,7 +68,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					ajax["list"] = list
 					ajax["pair"] = Bot[pair].Pair
 					ajax["order"] = Bot[pair].Order
-					ajax["wallet"] = G_Balance
+					ajax["wallet"] = Balance
 					ajax["trend"] = Bot[pair].Trend
 					ajax["conf"] = Bot[pair].Conf
 					ajax["trans"] = Bot[pair].Trans

@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"io"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,16 +16,20 @@ import (
 //{"pairing_id":1,"primary_currency":"THB","secondary_currency":"BTC","change":5.5,"last_price":117103,"volume_24hours":985.99500309,
 //"orderbook":{"bids":{"total":652,"volume":1584.9082265,"highbid":116960},"asks":{"total":2001,"volume":482.70775266,"highbid":117700}}
 
-func get_body() io.Reader {
+func get_body() url.Values {
 	nonce := strconv.FormatInt(time.Now().UnixNano(), 10)
 	h := sha256.New()
-	h.Write([]byte(api_key + nonce + api_secret))
+	h.Write([]byte(Conf.Key + nonce + Conf.Secret))
 	form := url.Values{
-		"key":       {api_key},
+		"key":       {Conf.Key},
 		"nonce":     {nonce},
 		"signature": {hex.EncodeToString(h.Sum(nil))},
 	}
-	return bytes.NewBufferString(form.Encode())
+	if Conf.TwoFA != "" {
+		form.Add("twofa", Conf.TwoFA)
+	}
+	//	return bytes.NewBufferString(form.Encode())
+	return form
 }
 
 func api_usdthb() {
@@ -67,7 +71,7 @@ func api_pair() {
 
 func api_balance() {
 	Delay.Refresh_Balance = _ir(10, 2)
-	rsp, err := http.Post(api_url+"balance", "application/x-www-form-urlencoded", get_body())
+	rsp, err := http.Post(Conf.URL+"balance", "application/x-www-form-urlencoded", bytes.NewBufferString(get_body().Encode()))
 	if err != nil {
 		_err("api_balance - Post - ", err.Error())
 		return
@@ -87,22 +91,15 @@ func api_balance() {
 		return
 	}
 	if dat.Success == true {
-		G_Balance = dat.Balance
+		Balance = dat.Balance
 	}
 }
 
 func api_order(pair int64) {
 	Bot[pair].Delay.Refresh_Order = _ir(30, 5)
-	nonce := strconv.FormatInt(time.Now().UnixNano(), 10)
-	h := sha256.New()
-	h.Write([]byte(api_key + nonce + api_secret))
-	form := url.Values{
-		"key":       {api_key},
-		"nonce":     {nonce},
-		"signature": {hex.EncodeToString(h.Sum(nil))},
-		"pairing":   {_is(pair)},
-	}
-	rsp, err := http.Post(api_url+"getorders", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+	form := get_body()
+	form.Add("pairing", _is(pair))
+	rsp, err := http.Post(Conf.URL+"getorders", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		_err("api_order - Post - ", err.Error())
 		return
@@ -144,7 +141,7 @@ func api_order(pair int64) {
 
 func api_history() {
 	Delay.Refresh_History = _ir(30, 5)
-	rsp, err := http.Post(api_url+"history", "application/x-www-form-urlencoded", get_body())
+	rsp, err := http.Post(Conf.URL+"history", "application/x-www-form-urlencoded", bytes.NewBufferString(get_body().Encode()))
 	if err != nil {
 		_err("api_history - Post - ", err.Error())
 		return
@@ -198,8 +195,6 @@ func api_history() {
 				idx++
 			}
 			if idx == 4 {
-				//Trans = append(Trans, line)
-
 				for j := range Bot {
 					if Bot[j].Pair.Primary == line.Primary_Currency && Bot[j].Pair.Secondary == line.Secondary_Currency {
 						Bot[j].Trans = append(Bot[j].Trans, line)
@@ -282,11 +277,6 @@ func api_trade(pair int64) {
 	ct = bytes.Replace(ct, []byte(`seconds":"`), []byte(`seconds":`), -1)
 	ct = bytes.Replace(ct, []byte(`"},{"trade_id`), []byte(`},{"trade_id`), -1)
 
-	/*
-			   "trade_id":1790148,"rate":325.00000000,"amount":1.00000000,"trade_date":2017-09-17 06:15:01,"order_id":826224,"trade_type":sell,"reference_id":0,"seconds":611},{"trade_id"
-
-		,{"order_id":825895,"rate":326.00000000,"amount":93.18402930,"date_added":2017-09-17 03:51:33,"order_type":sell,"display_vol1":30,377.99 THB,"display_vol2":93.18402930 OMG},{"order_id"
-	*/
 	//fmt.Println(string(ct))
 	var dat UITrade
 	if err := json.Unmarshal(ct, &dat); err != nil {
@@ -302,15 +292,6 @@ func api_trade(pair int64) {
 	Bot[pair].Trend.UP_SUM_10 = 0.0
 	Bot[pair].Trend.DOWN_SUM_10 = 0.0
 
-	/*
-		ID    int32   `json:"order_id"`
-		Rate  float64 `json:"rate"`
-		Amout float64 `json:"amount"`
-		Date  string  `json:"date_added"`
-		Type  string  `json:"order_type"`
-		Vol1  string  `json:"display_vol1"`
-		Vol2  string  `json:"display_vol2"`
-	*/
 	for i := range dat.Complete {
 		trade_vol += dat.Complete[i].Amout
 		Bot[pair].Trend.TRADE_SUM += dat.Complete[i].Amout * dat.Complete[i].Rate
@@ -340,20 +321,15 @@ func api_buy(pair int64, amount float64, rate float64) {
 	if Bot[pair].Delay.Next_Buy > 0 {
 		return
 	}
-	nonce := strconv.FormatInt(time.Now().UnixNano(), 10)
-	h := sha256.New()
-	h.Write([]byte(api_key + nonce + api_secret))
-	form := url.Values{
-		"key":       {api_key},
-		"nonce":     {nonce},
-		"signature": {hex.EncodeToString(h.Sum(nil))},
-		"pairing":   {_is(pair)},
-		"type":      {"buy"},
-		"amount":    {_fs(amount)},
-		"rate":      {_fs(rate)},
-	}
+	Delay.Next_BuySell = 5
 	Bot[pair].Delay.Next_Buy = 60
-	rsp, err := http.Post(api_url+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+
+	form := get_body()
+	form.Add("pairing", _is(pair))
+	form.Add("type", "buy")
+	form.Add("amount", _fs(amount))
+	form.Add("rate", _fs(rate))
+	rsp, err := http.Post(Conf.URL+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		_err("api_buy - Post - ", err.Error())
 		return
@@ -366,16 +342,16 @@ func api_buy(pair int64, amount float64, rate float64) {
 		_err("api_buy - ioutil - ", err.Error())
 		return
 	}
-	//	fmt.Println(string(ct))
+	fmt.Println(string(ct))
 	var dat UIOrder
 	if err := json.Unmarshal(ct, &dat); err != nil {
 		_err("api_buy - Unmarshal - ", err.Error())
 		return
 	}
 	Bot[pair].Delay.Next_Sell = Bot[pair].Delay.Next_Sell + 5
-	Bot[pair].Delay.Refresh_Order = 0
+	Bot[pair].Delay.Refresh_Order = 3
 	if dat.Success == true {
-
+		api_line("Buy - " + Bot[pair].Pair.Secondary + "\nRate: " + _fs(rate) + "\nAmount: " + _fs(amount))
 	}
 }
 
@@ -383,21 +359,16 @@ func api_sell(pair int64, amount float64, rate float64) {
 	if Bot[pair].Delay.Next_Sell > 0 {
 		return
 	}
-	nonce := strconv.FormatInt(time.Now().UnixNano(), 10)
-	h := sha256.New()
-	h.Write([]byte(api_key + nonce + api_secret))
-	form := url.Values{
-		"key":       {api_key},
-		"nonce":     {nonce},
-		"signature": {hex.EncodeToString(h.Sum(nil))},
-		"pairing":   {_is(pair)},
-		"type":      {"sell"},
-		"amount":    {_fs(amount)},
-		"rate":      {_fs(rate)},
-	}
+	Delay.Next_BuySell = 5
 	Bot[pair].Delay.Next_Sell = 60
 	Bot[pair].Delay.Next_Buy = 60
-	rsp, err := http.Post(api_url+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+
+	form := get_body()
+	form.Add("pairing", _is(pair))
+	form.Add("type", "sell")
+	form.Add("amount", _fs(amount))
+	form.Add("rate", _fs(rate))
+	rsp, err := http.Post(Conf.URL+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		_err("api_sell - Post - ", err.Error())
 		return
@@ -409,7 +380,7 @@ func api_sell(pair int64, amount float64, rate float64) {
 		_err("api_sell - ioutil - ", err.Error())
 		return
 	}
-	//	fmt.Println(string(ct))
+	fmt.Println(string(ct))
 	var dat UIOrder
 	if err := json.Unmarshal(ct, &dat); err != nil {
 		_err("api_sell - Unmarshal - ", err.Error())
@@ -418,22 +389,16 @@ func api_sell(pair int64, amount float64, rate float64) {
 	Bot[pair].Delay.Next_Buy = 300
 	Bot[pair].Delay.Refresh_Order = 0
 	if dat.Success == true {
-
+		api_line("Sell - " + Bot[pair].Pair.Secondary + "\nRate: " + _fs(rate) + "\nAmount: " + _fs(amount))
 	}
 }
 
 func api_cancel(pair int64, id int64) {
-	nonce := strconv.FormatInt(time.Now().UnixNano(), 10)
-	h := sha256.New()
-	h.Write([]byte(api_key + nonce + api_secret))
-	form := url.Values{
-		"key":       {api_key},
-		"nonce":     {nonce},
-		"signature": {hex.EncodeToString(h.Sum(nil))},
-		"pairing":   {_is(pair)},
-		"order_id":  {_is(id)},
-	}
-	rsp, err := http.Post(api_url+"cancel", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+
+	form := get_body()
+	form.Add("pairing", _is(pair))
+	form.Add("order_id", _is(id))
+	rsp, err := http.Post(Conf.URL+"cancel", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		_err("api_cancel - Post - ", err.Error())
 		return
@@ -456,8 +421,42 @@ func api_cancel(pair int64, id int64) {
 			break
 		}
 	}
-	Bot[pair].Delay.Refresh_Order = 0
+	Bot[pair].Delay.Refresh_Order = 2
 	if dat.Success == true {
 
+	}
+}
+
+func api_line(msg string) {
+	if Conf.Line != "" {
+		client := &http.Client{}
+		form := url.Values{
+			"message": {msg},
+		}
+		req, err := http.NewRequest("POST", "https://notify-api.line.me/api/notify", bytes.NewBufferString(form.Encode()))
+		if err != nil {
+			_err("api_line - Post - ", err.Error())
+			return
+		}
+		req.Header.Add("Authorization", "Bearer "+Conf.Line)
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		rsp, err := client.Do(req)
+		if err != nil {
+			_err("api_line - Header - ", err.Error())
+			return
+		}
+		defer rsp.Body.Close()
+		ct, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			_err("api_line - ioutil - ", err.Error())
+			return
+		}
+		fmt.Println(string(ct))
+		//	fmt.Println(string(ct))
+		var dat map[string]interface{}
+		if err := json.Unmarshal(ct, &dat); err != nil {
+			_err("api_line - Unmarshal - ", err.Error())
+			return
+		}
 	}
 }

@@ -1,13 +1,7 @@
 package main
 
-var api_url = "https://bx.in.th/api/"
-var api_key = ""
-var api_secret = ""
-var api_pass = ""
-var api_port int64 = 0
-
 // global
-var G_Balance map[string]ABalance
+var Balance map[string]ABalance
 var Bot map[int64]*ABot
 var Delay GDelay
 var VERSION string
@@ -18,10 +12,9 @@ var Conf GConf
 
 // each
 type ABot struct {
-	Pair  APair
-	Conf  AConfig
-	Order []AOrder
-	//	History  []AHistory
+	Pair     APair
+	Conf     AConfig
+	Order    []AOrder
 	Book     UIBook
 	Trade    UITrade
 	Trend    ATrend
@@ -71,7 +64,14 @@ type AConfig struct {
 	KEEP      map[string]float64
 }
 type GConf struct {
-	Theme string
+	Theme  string
+	Line   string
+	URL    string
+	Key    string
+	Secret string
+	Pass   string
+	TwoFA  string
+	Port   int64
 }
 type ATrend struct {
 	UP_Price_All   float64
@@ -220,6 +220,7 @@ type GDelay struct {
 	Refresh_Balance int64
 	Refresh_History int64
 	Refresh_USDTHB  int64
+	Next_BuySell    int64
 }
 
 type ADelay struct {

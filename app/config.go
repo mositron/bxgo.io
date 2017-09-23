@@ -17,6 +17,8 @@ func LoadIni() {
 	Bot = map[int64]*ABot{}
 	Sort = []int64{}
 	Conf = GConf{}
+	Conf.URL = "https://bx.in.th/api/"
+
 	//Conf.KEEP = make(map[string]float64)
 	//	coin := []string{"BCH", "BTC", "DAS", "DOG", "ETH", "FTC", "GNO", "HYP", "LTC", "NMC", "OMG", "PND", "PPC", "QRK", "REP", "THB", "XCN", "XPM", "XPY", "XRP", "ZEC"}
 	scanner := bufio.NewScanner(file)
@@ -34,35 +36,64 @@ func LoadIni() {
 						Bot[p] = &ABot{}
 						Sort = append(Sort, p)
 					}
-					//Bot[p]
 					cmd = strings.TrimSpace(pair[1])
 					switch cmd {
 					case "enable":
-						Bot[p].Conf.Enable, _ = strconv.ParseBool(val)
+						if v, err := strconv.ParseBool(val); err == nil {
+							Bot[p].Conf.Enable = v
+						}
 					case "budget":
-						Bot[p].Conf.Budget, _ = strconv.ParseFloat(val, 64)
+						if v, err := strconv.ParseFloat(val, 64); err == nil && v > 0 {
+							Bot[p].Conf.Budget = v
+						}
 					case "max_price":
-						Bot[p].Conf.Max_Price, _ = strconv.ParseFloat(val, 64)
+						if v, err := strconv.ParseFloat(val, 64); err == nil && v > 0 {
+							Bot[p].Conf.Max_Price = v
+						}
 					case "max_order":
-						Bot[p].Conf.Max_Order, _ = strconv.ParseInt(val, 10, 64)
+						if v, err := strconv.ParseInt(val, 10, 64); err == nil && v > 0 {
+							Bot[p].Conf.Max_Order = v
+						}
 					case "margin":
-						Bot[p].Conf.Margin, _ = strconv.ParseFloat(val, 64)
+						if v, err := strconv.ParseFloat(val, 64); err == nil && v > 0 {
+							Bot[p].Conf.Margin = v
+						}
 					case "cycle":
-						Bot[p].Conf.Cycle, _ = strconv.ParseFloat(val, 64)
+						if v, err := strconv.ParseFloat(val, 64); err == nil && v > 0 {
+							Bot[p].Conf.Cycle = v
+						}
 					}
 				}
 			} else {
 				switch cmd {
 				case "port":
-					api_port, _ = strconv.ParseInt(val, 10, 64)
+					if v, err := strconv.ParseInt(val, 10, 64); err == nil && v > 0 {
+						Conf.Port = v
+					}
 				case "key":
-					api_key = val
+					if val != "" {
+						Conf.Key = val
+					}
 				case "secret":
-					api_secret = val
+					if val != "" {
+						Conf.Secret = val
+					}
 				case "pass":
-					api_pass = val
+					if val != "" {
+						Conf.Pass = val
+					}
 				case "theme":
-					Conf.Theme = val
+					if val != "" {
+						Conf.Theme = val
+					}
+				case "line":
+					if val != "" {
+						Conf.Line = val
+					}
+				case "twofa":
+					if val != "" {
+						Conf.TwoFA = val
+					}
 				}
 			}
 		}
