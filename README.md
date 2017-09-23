@@ -1,11 +1,12 @@
 # BXGo.io
+โปรแกรมแสดงราคาเหรียญ BTC ETH DASH XRP OMG และซื้อขายบนเว็บ bx.in.th อัตโนมัติ   
+
 
 ![Screenshot](https://github.com/positronth/bxgo.io/raw/master/theme/default/img/screenshot.png)  
 
 
-
 ### config.ini
-ในการติดตั้งครั้งแรก จะต้องเพิ่มค่าคอนฟิคให้โปรแกรมคือ
+ในการติดตั้งครั้งแรก จะต้องเพิ่มค่าคอนฟิคให้โปรแกรมคือ  
 key + secret ---- ได้จากการสร้างคีย์ใหม่ใน   https://bx.in.th/account  
 pass ---- รหัสอะไรก็ได้ สำหรับการยืนยันการสั่งลบการซื้อขาย  
 
