@@ -98,8 +98,8 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			if tp, ok := exts[ext]; ok {
 				w.Header().Add("Content-Type", tp)
+				w.Write([]byte(dat))
 			}
-			w.Write([]byte(dat))
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(r.URL.Path + "\nFile Not Found\n----------------------------\nBXGo v. " + VERSION + "\npowered by positron@jarm.com"))
