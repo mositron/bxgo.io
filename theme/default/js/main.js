@@ -59,9 +59,12 @@ function _getData(){
       for(var i=0;i<data.sort.length;i++){
         var k=data.sort[i];
         var v=data.list[k];
+        var bth=data.bitfinex[v.secondary][6]*THB;
+        var p=((bth-v.price)/v.price)*100;
+        var ps='(<span class="'+(p>0?'green">+':'red">')+_num(_fs(p))+'</span>%)';
         tmp+='<li class="nav-item"><a class="nav-link href_'+v.secondary+(pair==k?' active':'')+'" href="/'+v.secondary+'" data-pair="'+k+'">'+
         v.primary+'/'+v.secondary+': <span class="'+v.primary+'_'+v.secondary+'">'+_num(_fs(v.price))+'</span><br>'+
-        'THB/'+v.secondary+': <span class="THB2_'+v.secondary+'">'+_num(_fs(data.bitfinex[v.secondary][6]*THB))+'</span><br>'+
+        'THB/'+v.secondary+': <span class="THB2_'+v.secondary+'">'+_num(_fs(bth))+'</span> '+ps+'<br>'+
         'USD/'+v.secondary+': <span class="USD_'+v.secondary+'">'+_num(_fs(data.bitfinex[v.secondary][6]))+'</span>'+
         '</a></li>';
       };
@@ -79,7 +82,7 @@ function _getData(){
         }
       });
       var cur=currency+'/'+data.pair.secondary_currency;
-      document.title = _num(_fs(data.pair.last_price)) + ' : '+currency+'/'+data.pair.secondary_currency+' - BXGo v. {VERSION}';
+      document.title = _num(_fs(data.pair.last_price)) + ' : '+currency+'/'+data.pair.secondary_currency+' - BXGo v. '+ver;
       $('#pairing').html(data.pair.secondary_currency);
       $('.'+currency+'_'+data.pair.secondary_currency).html(_num(_fs(data.pair.last_price)));
       $('.primary_currency').html(currency);
@@ -133,7 +136,7 @@ function _getData(){
       $('#conf_current_budget').html(_num(_fs(data.wallet[currency].available)));//+' '+currency);
 
       $('#conf_buy_max_price').html(_num(_num(_fs(data.conf.Max_Price))));
-      $('#conf_current_price').html(_num(data.pair.last_price));//+' '+currency);
+      $('#conf_current_price').html(_num(_fs(data.pair.last_price)));//+' '+currency);
       $('#conf_buy_max_order').html(_num(data.conf.Max_Order));
       $('#conf_current_order').html($('#order>tr').length);
       $('#conf_diff').html(_num(data.conf.Cycle));

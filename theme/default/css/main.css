@@ -17,12 +17,14 @@ em span{color:#999;}
 .navbar .navbar-brand{color:#995003;font-weight:bold;font-size:24px;padding:20px 20px 20px 40px}
 .navbar li,.navbar a{color:#666;font-size:12px;line-height:1.4em;}
 .navbar div.nav-link{text-align:right;}
-.navbar .nav-link{padding:10px 20px !important;}
+.navbar .nav-link{padding:10px 15px !important;}
+.navbar a.nav-link{width:180px;}
+.navbar a.nav-link:hover{background:#222;}
 .navbar small{color:#444;font-size:12px}
 .navbar small span{color:#888;font-size:14px}
 .navbar a.active{color:#8e6941;}
 #navbarNetwork{overflow: hidden;margin:0px;white-space: nowrap;overflow: hidden;overflow-y: hidden;overflow-x: auto;-webkit-overflow-scrolling:touch;-ms-overflow-style: none;}
-#pair{padding:3px 10px;margin:0;display:inline-block;white-space:nowrap;float: none;}
+#pair{padding:5px 0px 3px;margin:0;display:inline-block;white-space:nowrap;float: none;}
 #pair li{float:none;display:inline-block;white-space: nowrap;}
 .max-height{max-height:120px;min-height:50px;overflow:hidden;overflow-y:auto;}
 .line{height:0px;border-top:1px solid #080808;border-bottom:1px solid #202020;margin:20px 0px 5px;}
