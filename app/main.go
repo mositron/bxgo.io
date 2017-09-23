@@ -159,7 +159,7 @@ func process(pair int64) {
 			p = ((100 / (Bot[pair].Conf.Margin + 100)) * Bot[pair].Pair.Price)
 		}
 	}
-
+	p += 0.01
 	if p > Bot[pair].Pair.Price {
 		p = Bot[pair].Pair.Price
 	}
@@ -172,21 +172,13 @@ func process(pair int64) {
 			Bot[pair].Sims = append(Bot[pair].Sims, sim)
 			p = sim.Buy - sim.Diff
 			if i == 0 && Bot[pair].Conf.Enable && Delay.Next_BuySell == 0 && Bot[pair].Delay.Next_Buy == 0 {
-				if Bot[pair].Conf.Budget > 0 && sim.Buy > 0 && (Bot[pair].Conf.Max_Price >= sim.Buy || Bot[pair].Conf.Max_Price == 0) && (sim.Buy+sim.Margin >= Bot[pair].Pair.Price) {
+				if Bot[pair].Conf.Budget > 0 && sim.Buy > 0 && Bot[pair].Conf.Max_Price >= sim.Buy && (sim.Buy+sim.Margin+0.01 >= Bot[pair].Pair.Price) {
 					if int64(len(Bot[pair].Order)) < Bot[pair].Conf.Max_Order {
-						keep := 0.0
-						/*
-							if v, ok := Conf.KEEP[Pair.Primary]; ok {
-								keep = v
-							}
-						*/
-						if Balance[Bot[pair].Pair.Primary].Available-Bot[pair].Conf.Budget >= keep {
-							if Bot[pair].Conf.Budget <= Balance[Bot[pair].Pair.Primary].Available {
-								if sim.Order_Buy == 0 && sim.Order_Sell == 0 {
-									_tn(time.Now().Format(time.Stamp)+" : send buy - ", _fs(Bot[pair].Conf.Budget), " <= ", _fs(Balance[Bot[pair].Pair.Primary].Available), " - rate: ", _fs(_price(pair, sim.Buy)))
-									_tn(Bot[pair].Pair.Secondary, " - price = ", _fs(Bot[pair].Pair.Price))
-									api_buy(pair, Bot[pair].Conf.Budget, _price(pair, sim.Buy))
-								}
+						if Bot[pair].Conf.Budget <= Balance[Bot[pair].Pair.Primary].Available {
+							if sim.Order_Buy == 0 && sim.Order_Sell == 0 {
+								_tn(time.Now().Format(time.Stamp)+" : send buy - ", _fs(Bot[pair].Conf.Budget), " <= ", _fs(Balance[Bot[pair].Pair.Primary].Available), " - rate: ", _fs(_price(pair, sim.Buy)))
+								_tn(Bot[pair].Pair.Secondary, " - price = ", _fs(Bot[pair].Pair.Price))
+								api_buy(pair, Bot[pair].Conf.Budget, _price(pair, sim.Buy))
 							}
 						}
 					}
@@ -196,14 +188,8 @@ func process(pair int64) {
 	}
 
 	if Bot[pair].Conf.Enable && Delay.Next_BuySell == 0 && Bot[pair].Delay.Next_Sell == 0 && Bot[pair].Pair.Price > 0 && int64(len(Bot[pair].Order)) < Bot[pair].Conf.Max_Order && Balance[Bot[pair].Pair.Secondary].Available > 0 {
-		keep := 0.002
-		/*
-			if v, ok := Conf.KEEP[Pair.Secondary]; ok {
-				keep = v
-			}
-		*/
-		if Balance[Bot[pair].Pair.Secondary].Available > keep {
-			sell := Balance[Bot[pair].Pair.Secondary].Available - keep
+		if Balance[Bot[pair].Pair.Secondary].Available >= 0.002 {
+			sell := Balance[Bot[pair].Pair.Secondary].Available
 			if sell > 0 {
 				sim := _calc(pair, Bot[pair].Pair.Price)
 				rate := sim.Sell
