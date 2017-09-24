@@ -146,7 +146,7 @@ function _getData(){
 
       var tmp='';
       $.each(data.sims,function(k,v){
-        tmp+='<tr><td class="'+(v.Order_Buy?'in':'out')+'order">'+_num(_fs(v.Buy))+' '+currency+(v.Order_Buy?' (order:'+_num(_fs(v.Order_Buy))+')':'')+'</td><td class="'+(v.Order_Sell?'in':'out')+'order">'+_num(_fs(v.Sell))+' '+currency+(v.Order_Sell?' (order:'+_num(_fs(v.Order_Sell))+')':'')+'</td><td>'+_num(_fs(v.Margin))+' '+currency+'</td><td>'+_num(v.Coin.toFixed(8))+' '+data.pair.secondary_currency+'</td><td>'+_num(_fs(v.Profit))+' '+currency+'</td><td>'+_num(_fs(v.Margin))+' '+currency+'</td></tr>';
+        tmp+='<tr><td class="'+(v.Order_Buy?'in':'out')+'order">'+_num(_fs(v.Buy))+' '+currency+(v.Order_Buy?' (order:'+_num(_fs(v.Order_Buy))+')':'')+'</td><td class="'+(v.Order_Sell?'in':'out')+'order">'+_num(_fs(v.Sell))+' '+currency+(v.Order_Sell?' (order:'+_num(_fs(v.Order_Sell))+')':'')+'</td><td>'+_num(_fs(v.Margin))+' '+currency+'</td><td>'+_num(v.Coin.toFixed(8))+' '+data.pair.secondary_currency+'</td><td>'+_num(_fs(v.Profit))+' '+currency+'</td><td>'+_num(_fs(v.Diff))+' '+currency+'</td></tr>';
       });
       $('#sims').html(tmp);
 
