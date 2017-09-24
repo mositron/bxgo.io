@@ -1,6 +1,6 @@
 #!/bin/bash
 
-V=0.4.6
+V=0.4.7
 _os=('windows:win:.exe:386_-x86,amd64_-x64' 'linux:linux:x:386_-x86,amd64_-x64' 'darwin:mac:x:amd64_x')
 
 for _s in ${_os[@]}
@@ -17,7 +17,6 @@ do
     then
       _e=''
     fi
-    #$_o,$_n
     for _i in ${_a[@]}
     do
         _is=(${_i//_/ })

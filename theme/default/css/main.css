@@ -18,6 +18,7 @@ em span{color:#999;}
 .navbar li,.navbar a{color:#666;font-size:12px;line-height:1.4em;}
 .navbar div.nav-link{text-align:right;}
 .navbar .nav-link{padding:10px 15px !important;}
+.navbar .nav-link hr{color:#000;height:0px;width:100%;border:none;margin:3px 0px;border-top:1px solid #000;border-bottom:1px solid #161616;}
 .navbar a.nav-link{width:180px;}
 .navbar a.nav-link:hover{background:#222;}
 .navbar small{color:#444;font-size:12px}

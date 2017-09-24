@@ -31,6 +31,7 @@ func _fs(i float64) string {
 func _is(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
+
 func _ir(i int64, r int64) int64 {
 	return (i - r) + rand.Int63n((i*2)+1)
 }

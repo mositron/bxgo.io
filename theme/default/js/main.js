@@ -43,29 +43,22 @@ function _getData(){
       $('#time').html(d.getDate()+'/'+('0'+(d.getMonth()+1)).substr(-2)+'/'+d.getFullYear()+' '+('0'+d.getHours()).substr(-2)+':'+('0'+d.getMinutes()).substr(-2)+':'+('0'+d.getSeconds()).substr(-2));
       THB = data.usdthb.rates.THB;
       $('.usdthb').html('1 USD = '+THB+' THB');
-      //var tmp='';
-      /*
-      $.each(data.bitfinex,function(k,v){
-        var wl=$('#bitfinex_'+k);
-        if(!wl.length)
-        {
-          $('#bitfinex').append('<div id="bitfinex_'+k+'" class="col-6 col-sm-6 col-md-4 col-lg-3"></div>');
-          wl=$('#bitfinex_'+k);
-        }
-        wl.html(k+'/USD: '+_num(v[6])+' <em>(<span>'+_num((v[6]*THB).toFixed(2))+' THB</span>)</em>');
-      });
-      */
-      var tmp='<li class="nav-item"><div class="nav-link">BX.in.th<br>Bitfinex<br>Bitfinex</div></li>';
+      var tmp='<li class="nav-item"><div class="nav-link">BX.in.th<br>Bitfinex<br>Bittrex<hr>Bitfinex<br>Bittrex</div></li>';
       for(var i=0;i<data.sort.length;i++){
         var k=data.sort[i];
         var v=data.list[k];
         var bth=data.bitfinex[v.secondary][6]*THB;
+        var btt=data.bittrex[v.secondary].Price*THB;
         var p=((bth-v.price)/v.price)*100;
+        var p2=((btt-v.price)/v.price)*100;
         var ps='(<span class="'+(p>0?'green">+':'red">')+_num(_fs(p))+'</span>%)';
+        var ps2='(<span class="'+(p2>0?'green">+':'red">')+_num(_fs(p2))+'</span>%)';
         tmp+='<li class="nav-item"><a class="nav-link href_'+v.secondary+(pair==k?' active':'')+'" href="/'+v.secondary+'" data-pair="'+k+'">'+
         v.primary+'/'+v.secondary+': <span class="'+v.primary+'_'+v.secondary+'">'+_num(_fs(v.price))+'</span><br>'+
         'THB/'+v.secondary+': <span class="THB2_'+v.secondary+'">'+_num(_fs(bth))+'</span> '+ps+'<br>'+
-        'USD/'+v.secondary+': <span class="USD_'+v.secondary+'">'+_num(_fs(data.bitfinex[v.secondary][6]))+'</span>'+
+        'THB/'+v.secondary+': <span class="THB3_'+v.secondary+'">'+_num(_fs(btt))+'</span> '+ps2+'<hr>'+
+        'USD/'+v.secondary+': <span class="USD_'+v.secondary+'">'+_num(_fs(data.bitfinex[v.secondary][6]))+'<br>'+
+        'USD/'+v.secondary+': <span class="USD2_'+v.secondary+'">'+_num(_fs(data.bittrex[v.secondary].Price))+'</span>'+
         '</a></li>';
       };
       $('#pair').html(tmp);
@@ -101,11 +94,24 @@ function _getData(){
       _color($('#bfn_change'),_fs(bfn[5]*100));
       $('#bfn_vol').html(_num(bfn[7]));
       $('#bfn_buy').html(_num(_fs(bfn[0]*THB)));
-      $('#bfn_buy_usd').html(_num(bfn[0]));
+      $('#bfn_buy_usd').html(_num(_fs(bfn[0])));
       $('#bfn_buy_vol').html(_num(bfn[1]));
       $('#bfn_sell').html(_num(_fs(bfn[2]*THB)));
-      $('#bfn_sell_usd').html(_num(bfn[2]));
+      $('#bfn_sell_usd').html(_num(_fs(bfn[2])));
       $('#bfn_sell_vol').html(_num(bfn[3]));
+
+
+      var btx = data.bittrex[data.pair.secondary_currency];
+      $('#btx_price').html(_num(_fs(btx.Price*THB)));
+      $('#btx_price_usd').html(_num(btx.Price));
+      _color($('#btx_change'),_fs(btx.Change*100));
+      $('#btx_vol').html(_num(btx.Volume));
+      $('#btx_buy').html(_num(_fs(btx.Bid*THB)));
+      $('#btx_buy_usd').html(_num(_fs(btx.Bid)));
+      $('#btx_buy_vol').html('Order: '+_num(btx.Order_Buy));
+      $('#btx_sell').html(_num(_fs(btx.Ask*THB)));
+      $('#btx_sell_usd').html(_num(_fs(btx.Ask)));
+      $('#btx_sell_vol').html('Order: '+_num(btx.Order_Sell));
 
       $('#trend_trade').html(_num(_fs(data.trend.TRADE_AVG))).attr('class',(data.trend.TRADE_AVG<data.pair.last_price?'bred':'bgreen'));
       $('#trend_10_price').html(_num(data.trend.Price_AVG_10));
@@ -164,7 +170,7 @@ function _getData(){
       {
         loaded=true;
         $('#waiting').css('display','none');
-        $('#bxgo').css('display','block');
+//        $('#bxgo').css('display','block');
         $('#ui').css('display','block');
         $('#mywall').css('display','block');
       }

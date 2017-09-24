@@ -76,6 +76,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					ajax["delay"] = Bot[pair].Delay
 					ajax["usdthb"] = USDTHB
 					ajax["bitfinex"] = Bitfinex
+					ajax["bittrex"] = Bittrex
 				}
 				b, err := json.Marshal(ajax)
 				if err != nil {

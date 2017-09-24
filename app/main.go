@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	VERSION = "0.4.6"
+	VERSION = "0.4.7"
 	log.SetFlags(0)
 	LoadIni()
 	if Conf.Key == "" || Conf.Secret == "" {
@@ -18,6 +18,7 @@ func main() {
 	}
 	USDTHB = AUSDTHB{}
 	Bitfinex = map[string][]float64{}
+	Bittrex = map[string]GBittrex{}
 	bitfinex_load()
 	n := int64(1)
 	for i := range Bot {
@@ -73,6 +74,13 @@ func main() {
 				api_usdthb()
 			}()
 			ds += "usdthb:"
+			use = use_time(use, 100)
+		}
+		if Delay.Refresh_Bittrex == 0 {
+			go func() {
+				api_bittrex()
+			}()
+			ds += "bittrex:"
 			use = use_time(use, 100)
 		}
 

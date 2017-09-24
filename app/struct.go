@@ -7,6 +7,7 @@ var Delay GDelay
 var VERSION string
 var Sort []int64
 var Bitfinex map[string][]float64
+var Bittrex map[string]GBittrex
 var USDTHB AUSDTHB
 var Conf GConf
 
@@ -23,6 +24,7 @@ type ABot struct {
 	Delay    ADelay
 	Min_Sell float64
 }
+
 type AUSDTHB struct {
 	ID   string `json:"base"`
 	Date string `json:"date"`
@@ -30,6 +32,7 @@ type AUSDTHB struct {
 		THB float64 `json:"THB"`
 	} `json:"rates"`
 }
+
 type ACoin struct {
 	BCH float64
 	BTC float64
@@ -142,10 +145,6 @@ type UIBalance struct {
 	Error   string              `json:"error"`
 }
 
-/*
-{"success":true,"orders":[{"pairing_id":26,"order_id":813197,"order_type":"sell","rate":347,"amount":10,"date":"2017-09-16 13:54:27"}]}
-*/
-
 type AOrder struct {
 	ID     int64   `json:"order_id"`
 	Pair   int64   `json:"pairing_id"`
@@ -220,6 +219,7 @@ type GDelay struct {
 	Refresh_Balance int64
 	Refresh_History int64
 	Refresh_USDTHB  int64
+	Refresh_Bittrex int64
 	Next_BuySell    int64
 }
 
@@ -231,10 +231,6 @@ type ADelay struct {
 	Refresh_Order int64
 }
 
-/*
-{"bids":[["315.12000000","8.68529632"],["315.11100000","185.71348644"],["315.11000000","21.10140959"],["315.01000000","11.74435050"],["315.00110000","15.83327804"],["315.00000000","633.33333333"],[
-*/
-
 type ASims struct {
 	Buy        float64
 	Sell       float64
@@ -244,4 +240,34 @@ type ASims struct {
 	Coin       float64
 	Profit     float64
 	Diff       float64
+}
+
+type GBittrex struct {
+	Price      float64 `json:"Price"`
+	Change     float64 `json:"Change"`
+	Volume     float64 `json:"Volume"`
+	Bid        float64 `json:"Bid"`
+	Ask        float64 `json:"Ask"`
+	Order_Buy  int64   `json:"Order_Buy"`
+	Order_Sell int64   `json:"Order_Sell"`
+}
+
+type ABittrex struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Result  []struct {
+		Market     string  `json:"MarketName"`
+		High       float64 `json:"High"`
+		Low        float64 `json:"Low"`
+		Volume     float64 `json:"Volume"`
+		Price      float64 `json:"Last"`
+		BaseVolume float64 `json:"BaseVolume"`
+		Date       string  `json:"TimeStamp"`
+		Bid        float64 `json:"Bid"`
+		Ask        float64 `json:"Ask"`
+		Order_Buy  int64   `json:"OpenBuyOrders"`
+		Order_Sell int64   `json:"OpenSellOrders"`
+		PrevDay    float64 `json:"PrevDay"`
+		Created    string  `json:"Created"`
+	} `json:"result"`
 }

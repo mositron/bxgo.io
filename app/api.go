@@ -452,11 +452,43 @@ func api_line(msg string) {
 			return
 		}
 		fmt.Println(string(ct))
-		//	fmt.Println(string(ct))
 		var dat map[string]interface{}
 		if err := json.Unmarshal(ct, &dat); err != nil {
 			_err("api_line - Unmarshal - ", err.Error())
 			return
+		}
+	}
+}
+
+func api_bittrex() {
+	Delay.Refresh_Bittrex = _ir(5, 2)
+	resp, err := http.Get("https://bittrex.com/api/v1.1/public/getmarketsummaries")
+	if err != nil {
+		_err("apt_bittrex - ", err.Error())
+		return
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	var bitt ABittrex
+	if err := json.Unmarshal(body, &bitt); err != nil {
+		_err("api_bittrex - Unmarshal - ", err.Error(), string(body))
+		return
+	}
+	if bitt.Success == true {
+		mk := map[string]string{"USDT-BTC": "BTC", "USDT-ETH": "ETH", "USDT-DASH": "DAS", "USDT-XRP": "XRP", "USDT-OMG": "OMG"}
+		Bittrex = map[string]GBittrex{}
+		for i := range bitt.Result {
+			var m = bitt.Result[i]
+			if market, ok := mk[m.Market]; ok {
+				Bittrex[market] = GBittrex{
+					Price:      m.Price,
+					Change:     (m.Price - m.PrevDay) / m.PrevDay,
+					Volume:     m.Volume,
+					Bid:        m.Bid,
+					Ask:        m.Ask,
+					Order_Buy:  m.Order_Buy,
+					Order_Sell: m.Order_Sell,
+				}
+			}
 		}
 	}
 }

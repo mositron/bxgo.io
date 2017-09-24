@@ -29,25 +29,21 @@
       <ul class="navbar-nav" id="pair"></ul>
     </div>
   </nav>
-  <div id="bxgo" style="display:none">
-    <div class="line"><span id="pairing"></span><small>v. {VERSION}</small></div>
-    <!--div class="box"><div id="wallet" class="row"></div></div-->
-    <!--div class="line"><span>Bitfinex</span><small class="usdthb"></small></div>
-    <div class="box"><div id="bitfinex" class="row"></div></div-->
-  </div>
   <div id="waiting" style="text-align:center;font-size:36px;color:#000;text-shadow:1px 1px 0px #222;padding:100px 0px;">Loading...</div>
   <div id="ui" style="display:none">
-    <div class="row">
-      <div class="col-sm-3">
-        <div class="trend">
-          <div class="line"><span>Trending</span><small id="trend_trade"></small></div>
-          <div class="box">
-            <div><strong>Price:</strong>  <span id="trend_10_price"></span> <em>(<span id="trend_10_change"></span>)</em></div>
-            <div><strong>Bid:</strong>    <span class="green">+</span><span id="trend_10_bid_sell"></span> / <span class="red">-</span><span id="trend_10_bid_buy"></span></div>
-            <div><strong>Volume:</strong> <span class="green">+</span><span id="trend_10_vol_sell"></span>% / <span class="red">-</span><span id="trend_10_vol_buy"></span>%</div>
+    <div class="line"><span>BXGo.io v. {VERSION}</span><span id="pairing"></span><span>Trending</span><small id="trend_trade"></small></div>
+    <div style="padding:5px">
+      <div class="trend">
+        <div class="box">
+          <div class="row">
+            <div class="col-sm-4"><strong>Price:</strong>  <span id="trend_10_price"></span> <em>(<span id="trend_10_change"></span>)</em></div>
+            <div class="col-sm-4"><strong>Bid:</strong>    <span class="green">+</span><span id="trend_10_bid_sell"></span> / <span class="red">-</span><span id="trend_10_bid_buy"></span></div>
+            <div class="col-sm-4"><strong>Volume:</strong> <span class="green">+</span><span id="trend_10_vol_sell"></span>% / <span class="red">-</span><span id="trend_10_vol_buy"></span>%</div>
           </div>
         </div>
       </div>
+    </div>
+    <div class="row">
       <div class="col-sm-4">
         <div class="stats">
           <div class="line"><span>BX.in.th</span><small id="time"></small></div>
@@ -59,7 +55,7 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-5">
+      <div class="col-sm-4">
         <div class="stats">
           <div class="line"><span>Bitfinex.com</span><small class="usdthb"></small></div>
           <div class="box">
@@ -67,6 +63,17 @@
             <div><strong>Volume:</strong> <span id="bfn_vol"></span></div>
             <div><strong>Buy:</strong>    <span id="bfn_buy"></span> / <span id="bfn_buy_vol"></span> <small style="float:right">~ <span id="bfn_buy_usd"></span> USD</small></div>
             <div><strong>Sell:</strong>   <span id="bfn_sell"></span> / <span id="bfn_sell_vol"></span> <small style="float:right">~ <span id="bfn_sell_usd"></span> USD</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="stats">
+          <div class="line"><span>Bittrex.com</span><small class="usdthb"></small></div>
+          <div class="box">
+            <div><strong>Price:</strong>  <span id="btx_price"></span> <em>(<span id="btx_change"></span>%)</em> <small style="float:right">~ <span id="btx_price_usd"></span> USD</small></div>
+            <div><strong>Volume:</strong> <span id="btx_vol"></span></div>
+            <div><strong>Buy:</strong>    <span id="btx_buy"></span> / <span id="btx_buy_vol"></span> <small style="float:right">~ <span id="btx_buy_usd"></span> USD</small></div>
+            <div><strong>Sell:</strong>   <span id="btx_sell"></span> / <span id="btx_sell_vol"></span> <small style="float:right">~ <span id="btx_sell_usd"></span> USD</small></div>
           </div>
         </div>
       </div>
