@@ -176,11 +176,15 @@ function _getData(){
 }
 function _fs(s)
 {
-  return s.toFixed(currency=='THB'?2:8);
+  if(s && !isNaN(s) && s.toString().indexOf('.') != -1)
+  {
+    return s.toFixed(currency=='THB'?2:8);
+  }
+  return s?s:'';
 }
 function _color(o,i)
 {
-  if(i>0)
+  if(i&&!isNaN(i)&&i>0)
   {
     o.attr('class','green').html('+'+_num(i));
   }
