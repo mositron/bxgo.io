@@ -1,14 +1,37 @@
 #!/bin/bash
 
 V=0.4.6
+_os=('windows:win:.exe:386_-x86,amd64_-x64' 'linux:linux:x:386_-x86,amd64_-x64' 'darwin:mac:x:amd64_x')
 
-# Windows
-GOOS=windows GOARCH=386 go build -o BXGo-$V-Windows-i386.exe ./app
-GOOS=windows GOARCH=amd64 go build -o BXGo-$V-Windows-amd64.exe ./app
+for _s in ${_os[@]}
+do
+    unset _a
+    _t=(${_s//:/ })
+    _o=${_t[0]} # OS
+    _n=${_t[1]} # Name
+    _e=${_t[2]} # Ext
+    _a=${_t[3]} # Arc
+    _a=(${_a//,/ })
 
-# macOS
-GOOS=darwin GOARCH=amd64 go build -o BXGo-$V-macOS ./app
-
-# Linux
-GOOS=linux GOARCH=386 go build -o BXGo-$V-Linux-i386 ./app
-GOOS=linux GOARCH=amd64 go build -o BXGo-$V-Linux-amd64 ./app
+    if [ $_e == 'x' ]
+    then
+      _e=''
+    fi
+    #$_o,$_n
+    for _i in ${_a[@]}
+    do
+        _is=(${_i//_/ })
+        _ia=${_is[0]}
+        _in=${_is[1]}
+        if [ $_in == 'x' ]
+        then
+          _in=''
+        fi
+        rm -f ./bin/BXGo-$V-$_n$_in.zip
+        #_nv=BXGo-$V-$_n$_in$_e
+        _nv=BXGo-$V$_e
+        GOOS=$_o GOARCH=$_ia go build -o $_nv ./app
+        zip -r ./bin/BXGo-$V-$_n$_in.zip $_nv config.ini theme
+        rm -f $_nv
+    done
+done
