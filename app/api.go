@@ -280,7 +280,7 @@ func api_trade(pair int64) {
 	//fmt.Println(string(ct))
 	var dat UITrade
 	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_trade - Unmarshal - ", err.Error())
+		_err("api_trade - Unmarshal - ", err.Error(), string(ct))
 		return
 	}
 	//fmt.Println(dat)
