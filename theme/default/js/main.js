@@ -179,7 +179,7 @@ function _getData(){
       var tmp='';
       $.each(data.trans,function(k,v){
         var c = (v.Primary>0?'sell':'buy');
-        var rate=Math.abs(((v.Primary*100)/99.75)/v.Secondary);
+        var rate=Math.abs(v.Primary/v.Secondary);
         tmp+='<tr class="'+c+'"><td>'+(v.Primary>0?'+':'')+_num(_fs(v.Primary))+'</td><td>'+(v.Secondary>0?'+':'')+_num(v.Secondary)+'</td><td>'+_num(_fs(rate))+'</td><td>'+_num(v.Fee)+'</td><td>'+v.Date+'</td></tr>';
       });
       $('#history').html(tmp);

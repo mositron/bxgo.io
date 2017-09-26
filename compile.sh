@@ -1,6 +1,6 @@
 #!/bin/bash
 
-V=0.5.0-beta
+V=0.5.0
 _os=('windows:win:.exe:386_-x86,amd64_-x64' 'linux:linux:x:386_-x86,amd64_-x64' 'darwin:mac:x:amd64_x')
 
 for _s in ${_os[@]}
