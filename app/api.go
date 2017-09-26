@@ -55,12 +55,11 @@ func api_pair() {
 		_err("api_pair - Unmarshal - ", err.Error(), string(body))
 		return
 	}
-	now := ""
+	n := time.Now()
 	if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
-		now = (time.Now().In(loc)).Format("03:04")
-	} else {
-		now = time.Now().Format("03:04")
+		n = n.In(loc)
 	}
+	now := strconv.Itoa(n.Hour()) + ":" + strconv.Itoa(n.Minute())
 	for i := range pair {
 		if is, err := strconv.ParseInt(i, 10, 64); err == nil {
 			if _, ok := Bot[is]; ok {
@@ -487,12 +486,12 @@ func api_bittrex() {
 	if bitt.Success == true {
 		mk := map[string]string{"USDT-BTC": "BTC", "USDT-ETH": "ETH", "USDT-DASH": "DAS", "USDT-XRP": "XRP", "USDT-OMG": "OMG"}
 		CN := map[string]int64{"BTC": 1, "ETH": 21, "DAS": 22, "XRP": 25, "OMG": 26}
-		now := ""
+
+		n := time.Now()
 		if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
-			now = (time.Now().In(loc)).Format("03:04")
-		} else {
-			now = time.Now().Format("03:04")
+			n = n.In(loc)
 		}
+		now := strconv.Itoa(n.Hour()) + ":" + strconv.Itoa(n.Minute())
 		Bittrex = map[string]GBittrex{}
 		for i := range bitt.Result {
 			var m = bitt.Result[i]

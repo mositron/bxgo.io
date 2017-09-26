@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	bitfinex "github.com/bitfinexcom/bitfinex-api-go/v1"
@@ -63,12 +64,11 @@ func bitfinex_listen(in chan []float64, crn string) {
 		msg := <-in
 		if len(msg) == 10 {
 			Bitfinex[crn] = msg
-			now := ""
+			n := time.Now()
 			if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
-				now = (time.Now().In(loc)).Format("03:04")
-			} else {
-				now = time.Now().Format("03:04")
+				n = n.In(loc)
 			}
+			now := strconv.Itoa(n.Hour()) + ":" + strconv.Itoa(n.Minute())
 			var is = CN[crn]
 			if Bot[is].Graph.Bitfinex_Time != now {
 				if Bot[is].Graph.Bitfinex_Last > 0 {
