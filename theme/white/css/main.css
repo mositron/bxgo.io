@@ -30,9 +30,10 @@ em span{color:#333;}
 #pair li{float:none;display:inline-block;white-space: nowrap;}
 .max-height{max-height:120px;min-height:50px;overflow:hidden;overflow-y:auto;margin-bottom:10px;}
 .line{height:0px;margin:20px 0px 15px;border-top:1px solid #fff;border-bottom:1px solid #f0f0f0;}
-.line>span{display:inline-block;vertical-align:middle;margin:-14px 15px;padding:2px 10px;background:#fcfcfc;font-size:16px;color:#000;}
+.line>span{display:inline-block;vertical-align:middle;margin:-14px 15px;padding:2px 10px;background:#fff;font-size:16px;color:#000;}
 .line>small{float:right;margin:-12px 0px;background:#fcfcfc;padding:0px 5px 0px 10px;font-size:12px;color:#999;}
 .layout{background:#fcfcfc;padding:5px;margin:15px 0px;border:1px solid #f7f7f7;border-radius:4px;}
+.layout .line>span{background:#f7f7f7;}
 .box{padding:5px;background:#fcfcfc;}
 .green{color:#4cba63 !important;}
 .red{color:#e53939 !important;}
