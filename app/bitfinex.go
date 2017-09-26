@@ -62,11 +62,13 @@ func bitfinex_listen(in chan []float64, crn string) {
 	for {
 		msg := <-in
 		if len(msg) == 10 {
-			//	fmt.Println(crn, ": ", msg)
 			Bitfinex[crn] = msg
-
-			loc, _ := time.LoadLocation("Asia/Bangkok")
-			now := (time.Now().In(loc)).Format(time.Kitchen)
+			now := ""
+			if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
+				now = (time.Now().In(loc)).Format("03:04")
+			} else {
+				now = time.Now().Format("03:04")
+			}
 			var is = CN[crn]
 			if Bot[is].Graph.Bitfinex_Time != now {
 				if Bot[is].Graph.Bitfinex_Last > 0 {
@@ -79,8 +81,6 @@ func bitfinex_listen(in chan []float64, crn string) {
 				Bot[is].Graph.Bitfinex_Time = now
 			}
 			Bot[is].Graph.Bitfinex_Last = msg[6] * USDTHB.Rate.THB
-		} else {
-			//fmt.Println("bitfinex /Unknown: ", msg)
 		}
 	}
 }

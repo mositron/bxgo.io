@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	VERSION = "0.5.0 BETA"
+	VERSION = "0.5.0"
 	log.SetFlags(0)
 	LoadIni()
 	if Conf.Key == "" || Conf.Secret == "" {

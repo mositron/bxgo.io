@@ -130,7 +130,7 @@ function _getData(){
         for(var i=0;i<ml-1;i++){
           l.push('');
         }
-        l.push(data.graph.BX_Time.substr(0,data.graph.BX_Time.length-2));
+        l.push(data.graph.BX_Time);
         window.LineConfig.data.labels=l;
         window.LineChart.update();
       }
@@ -399,6 +399,7 @@ $(function(){
       options: {
           responsive: true,
           maintainAspectRatio:false,
+          elements: { point: { radius: 0 } },
           tooltips: {
               mode: 'index',
               intersect: false,

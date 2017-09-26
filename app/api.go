@@ -13,9 +13,6 @@ import (
 	"time"
 )
 
-//{"pairing_id":1,"primary_currency":"THB","secondary_currency":"BTC","change":5.5,"last_price":117103,"volume_24hours":985.99500309,
-//"orderbook":{"bids":{"total":652,"volume":1584.9082265,"highbid":116960},"asks":{"total":2001,"volume":482.70775266,"highbid":117700}}
-
 func get_body() url.Values {
 	nonce := strconv.FormatInt(time.Now().UnixNano(), 10)
 	h := sha256.New()
@@ -28,13 +25,11 @@ func get_body() url.Values {
 	if Conf.TwoFA != "" {
 		form.Add("twofa", Conf.TwoFA)
 	}
-	//	return bytes.NewBufferString(form.Encode())
 	return form
 }
 
 func api_usdthb() {
 	Delay.Refresh_USDTHB = 3600
-	//http://api.fixer.io/latest?base=USD&symbols=THB
 	resp, err := http.Get("http://api.fixer.io/latest?base=USD&symbols=THB")
 	if err != nil {
 		_err("api_usdthb - ", err.Error())
@@ -60,8 +55,12 @@ func api_pair() {
 		_err("api_pair - Unmarshal - ", err.Error(), string(body))
 		return
 	}
-	loc, _ := time.LoadLocation("Asia/Bangkok")
-	now := (time.Now().In(loc)).Format(time.Kitchen)
+	now := ""
+	if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
+		now = (time.Now().In(loc)).Format("03:04")
+	} else {
+		now = time.Now().Format("03:04")
+	}
 	for i := range pair {
 		if is, err := strconv.ParseInt(i, 10, 64); err == nil {
 			if _, ok := Bot[is]; ok {
@@ -407,7 +406,6 @@ func api_sell(ignore bool, pair int64, amount float64, rate float64) {
 }
 
 func api_cancel(pair int64, id int64) {
-
 	form := get_body()
 	form.Add("pairing", _is(pair))
 	form.Add("order_id", _is(id))
@@ -489,10 +487,12 @@ func api_bittrex() {
 	if bitt.Success == true {
 		mk := map[string]string{"USDT-BTC": "BTC", "USDT-ETH": "ETH", "USDT-DASH": "DAS", "USDT-XRP": "XRP", "USDT-OMG": "OMG"}
 		CN := map[string]int64{"BTC": 1, "ETH": 21, "DAS": 22, "XRP": 25, "OMG": 26}
-
-		loc, _ := time.LoadLocation("Asia/Bangkok")
-		now := (time.Now().In(loc)).Format(time.Kitchen)
-
+		now := ""
+		if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
+			now = (time.Now().In(loc)).Format("03:04")
+		} else {
+			now = time.Now().Format("03:04")
+		}
 		Bittrex = map[string]GBittrex{}
 		for i := range bitt.Result {
 			var m = bitt.Result[i]
@@ -518,7 +518,6 @@ func api_bittrex() {
 					Bot[is].Graph.Bittrex_Time = now
 				}
 				Bot[is].Graph.Bittrex_Last = m.Price * USDTHB.Rate.THB
-				_tn(Bot[is].Graph.Bittrex_Time, " != ", now, " > ", _fs(Bot[is].Graph.Bittrex_Last))
 			}
 		}
 	}
