@@ -135,30 +135,31 @@ function _getData(){
         window.LineChart.update();
       }
       var bfn = data.bitfinex[data.pair.secondary_currency];
-      $('#bfn_price').html(_num(_fs(bfn[6]*THB)));
-      $('#bfn_price_usd').html(_num(bfn[6]));
-      _color($('#bfn_change'),_fs(bfn[5]*100));
-      $('#bfn_vol').html(_num(bfn[7]));
-      $('#bfn_buy').html(_num(_fs(bfn[0]*THB)));
-      $('#bfn_buy_usd').html(_num(_fs(bfn[0])));
-      $('#bfn_buy_vol').html(_num(bfn[1]));
-      $('#bfn_sell').html(_num(_fs(bfn[2]*THB)));
-      $('#bfn_sell_usd').html(_num(_fs(bfn[2])));
-      $('#bfn_sell_vol').html(_num(bfn[3]));
-
-
+      if(bfn){
+        $('#bfn_price').html(_num(_fs(bfn[6]*THB)));
+        $('#bfn_price_usd').html(_num(bfn[6]));
+        _color($('#bfn_change'),_fs(bfn[5]*100));
+        $('#bfn_vol').html(_num(bfn[7]));
+        $('#bfn_buy').html(_num(_fs(bfn[0]*THB)));
+        $('#bfn_buy_usd').html(_num(_fs(bfn[0])));
+        $('#bfn_buy_vol').html(_num(bfn[1]));
+        $('#bfn_sell').html(_num(_fs(bfn[2]*THB)));
+        $('#bfn_sell_usd').html(_num(_fs(bfn[2])));
+        $('#bfn_sell_vol').html(_num(bfn[3]));
+      }
       var btx = data.bittrex[data.pair.secondary_currency];
-      $('#btx_price').html(_num(_fs(btx.Price*THB)));
-      $('#btx_price_usd').html(_num(_fs(btx.Price)));
-      _color($('#btx_change'),_fs(btx.Change*100));
-      $('#btx_vol').html(_num(btx.Volume));
-      $('#btx_buy').html(_num(_fs(btx.Bid*THB)));
-      $('#btx_buy_usd').html(_num(_fs(btx.Bid)));
-      $('#btx_buy_vol').html('Order: '+_num(btx.Order_Buy));
-      $('#btx_sell').html(_num(_fs(btx.Ask*THB)));
-      $('#btx_sell_usd').html(_num(_fs(btx.Ask)));
-      $('#btx_sell_vol').html('Order: '+_num(btx.Order_Sell));
-
+      if(btx){
+        $('#btx_price').html(_num(_fs(btx.Price*THB)));
+        $('#btx_price_usd').html(_num(_fs(btx.Price)));
+        _color($('#btx_change'),_fs(btx.Change*100));
+        $('#btx_vol').html(_num(btx.Volume));
+        $('#btx_buy').html(_num(_fs(btx.Bid*THB)));
+        $('#btx_buy_usd').html(_num(_fs(btx.Bid)));
+        $('#btx_buy_vol').html('Order: '+_num(btx.Order_Buy));
+        $('#btx_sell').html(_num(_fs(btx.Ask*THB)));
+        $('#btx_sell_usd').html(_num(_fs(btx.Ask)));
+        $('#btx_sell_vol').html('Order: '+_num(btx.Order_Sell));
+      }
       $('#trend_trade').html(_num(_fs(data.trend.TRADE_AVG))).attr('class',(data.trend.TRADE_AVG<data.pair.last_price?'bred':'bgreen'));
       $('#trend_10_price').html(_num(data.trend.Price_AVG_10));
       _color($('#trend_10_change'),_fs(data.trend.Price_AVG_10-data.pair.last_price));
@@ -398,13 +399,14 @@ $(function(){
       options: {
           responsive: true,
           maintainAspectRatio:false,
-          title:{
-              display:false,
-          //    text:'Chart.js Line Chart'
-          },
           tooltips: {
               mode: 'index',
               intersect: false,
+              callbacks: {
+                  label: function(tooltipItem, data) {
+                      return Number(tooltipItem.yLabel).toLocaleString('en');
+                  }
+              }
           },
           hover: {
               mode: 'nearest',
@@ -422,7 +424,12 @@ $(function(){
               }],
               yAxes: [{
                   display: true,
-                  gridLines:{display:true,drawBorder:true,drawOnChartArea:false,}
+                  gridLines:{display:true,drawBorder:true,drawOnChartArea:false,},
+                  ticks: {
+                      callback: function (value) {
+                          return Number(value).toLocaleString('en');
+                      }
+                  }
               }]
           }
       }
