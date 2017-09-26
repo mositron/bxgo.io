@@ -136,6 +136,9 @@ func main() {
 		if Delay.Next_BuySell > 0 {
 			Delay.Next_BuySell--
 		}
+		if Delay.Refresh_Bittrex > 0 {
+			Delay.Refresh_Bittrex--
+		}
 		iu := use
 		if use > 1000 {
 			use = 100

@@ -111,6 +111,29 @@ function _getData(){
       $('#bx_sell').html(_num(_fs(data.pair.orderbook.asks.highbid)));
       $('#bx_sell_vol').html(_num(data.pair.orderbook.asks.volume));
 
+      var ar,ml=0;
+      if(!(ar=data.graph.BX))ar=[];
+      ar.push(data.graph.BX_Last);
+      window.LineConfig.data.datasets[0].data=ar;
+      if(ar.length>ml)ml=ar.length;
+      if(!(ar=data.graph.Bitfinex))ar=[];
+      ar.push(data.graph.Bitfinex_Last);
+      window.LineConfig.data.datasets[1].data=ar;
+      if(ar.length>ml)ml=ar.length;
+      if(!(ar=data.graph.Bittrex))ar=[];
+      ar.push(data.graph.Bittrex_Last);
+      window.LineConfig.data.datasets[2].data=ar;
+      if(ar.length>ml)ml=ar.length;
+      if(window.LineChart)
+      {
+        var l=[];
+        for(var i=0;i<ml-1;i++){
+          l.push('');
+        }
+        l.push(data.graph.BX_Time.substr(0,5));
+        window.LineConfig.data.labels=l;
+        window.LineChart.update();
+      }
       var bfn = data.bitfinex[data.pair.secondary_currency];
       $('#bfn_price').html(_num(_fs(bfn[6]*THB)));
       $('#bfn_price_usd').html(_num(bfn[6]));
@@ -155,7 +178,8 @@ function _getData(){
       var tmp='';
       $.each(data.trans,function(k,v){
         var c = (v.Primary>0?'sell':'buy');
-        tmp+='<tr class="'+c+'"><td>'+(v.Primary>0?'+':'')+_num(_fs(v.Primary))+'</td><td>'+(v.Secondary>0?'+':'')+_num(v.Secondary)+'</td><td>'+_num(v.Fee)+'</td><td>'+v.Date+'</td></tr>';
+        var rate=Math.abs(((v.Primary*100)/99.75)/v.Secondary);
+        tmp+='<tr class="'+c+'"><td>'+(v.Primary>0?'+':'')+_num(_fs(v.Primary))+'</td><td>'+(v.Secondary>0?'+':'')+_num(v.Secondary)+'</td><td>'+_num(_fs(rate))+'</td><td>'+_num(v.Fee)+'</td><td>'+v.Date+'</td></tr>';
       });
       $('#history').html(tmp);
       $('#history_count').html('buy: '+$('#history>tr.buy').length+' / sell: '+$('#history>tr.sell').length);
@@ -344,4 +368,65 @@ $(function(){
     $('#order_action').val(btn.data('action'));
   });
   nav.load();
+
+  window.chartColors={red:'rgba(255,99,132,0.5)',orange:'rgba(255,159,64,0.5)',yellow:'rgba(255,205,86,0.5)',green:'rgba(75,192,192,0.5)',blue:'rgba(54,162,235,0.5)',purple:'rgba(153,102,255,0.5)'};
+  window.LineConfig = {
+      type: 'line',
+      data: {
+          //labels: ["January", "February", "March", "April", "May", "June", "July"],
+          labels:[],
+          datasets: [{
+              label: "BX.in.th",
+              backgroundColor: window.chartColors.red,
+              borderColor: window.chartColors.red,
+              data: [],
+              fill: false,
+          },{
+              label: "Bitfinex.com",
+              fill: false,
+              backgroundColor: window.chartColors.orange,
+              borderColor: window.chartColors.orange,
+              data: [],
+          },{
+              label: "Bittrex.com",
+              fill: false,
+              backgroundColor: window.chartColors.blue,
+              borderColor: window.chartColors.blue,
+              data: [],
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:{
+              display:false,
+          //    text:'Chart.js Line Chart'
+          },
+          tooltips: {
+              mode: 'index',
+              intersect: false,
+          },
+          hover: {
+              mode: 'nearest',
+              intersect: true
+          },
+          scales: {
+              xAxes: [{
+                  display: true,
+                  gridLines:{display:true,drawBorder:true,drawOnChartArea:false,},
+                  ticks: {
+                    autoSkip: true,
+                    maxRotation: 0,
+                    minRotation: 0
+                  }
+              }],
+              yAxes: [{
+                  display: true,
+                  gridLines:{display:true,drawBorder:true,drawOnChartArea:false,}
+              }]
+          }
+      }
+  };
+  var ctx = document.getElementById("graph").getContext("2d");
+  window.LineChart = new Chart(ctx, window.LineConfig);
 });

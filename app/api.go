@@ -60,10 +60,23 @@ func api_pair() {
 		_err("api_pair - Unmarshal - ", err.Error(), string(body))
 		return
 	}
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+	now := (time.Now().In(loc)).Format(time.Kitchen)
 	for i := range pair {
 		if is, err := strconv.ParseInt(i, 10, 64); err == nil {
 			if _, ok := Bot[is]; ok {
 				Bot[is].Pair = pair[i]
+				if Bot[is].Graph.BX_Time != now {
+					if Bot[is].Graph.BX_Last > 0 {
+						Bot[is].Graph.BX = append(Bot[is].Graph.BX, Bot[is].Graph.BX_Last)
+						l := len(Bot[is].Graph.BX)
+						if l > 60 {
+							Bot[is].Graph.BX = Bot[is].Graph.BX[l-60:]
+						}
+					}
+					Bot[is].Graph.BX_Time = now
+				}
+				Bot[is].Graph.BX_Last = pair[i].Price
 			}
 		}
 	}
@@ -475,6 +488,11 @@ func api_bittrex() {
 	}
 	if bitt.Success == true {
 		mk := map[string]string{"USDT-BTC": "BTC", "USDT-ETH": "ETH", "USDT-DASH": "DAS", "USDT-XRP": "XRP", "USDT-OMG": "OMG"}
+		CN := map[string]int64{"BTC": 1, "ETH": 21, "DAS": 22, "XRP": 25, "OMG": 26}
+
+		loc, _ := time.LoadLocation("Asia/Bangkok")
+		now := (time.Now().In(loc)).Format(time.Kitchen)
+
 		Bittrex = map[string]GBittrex{}
 		for i := range bitt.Result {
 			var m = bitt.Result[i]
@@ -488,6 +506,19 @@ func api_bittrex() {
 					Order_Buy:  m.Order_Buy,
 					Order_Sell: m.Order_Sell,
 				}
+				var is = CN[market]
+				if Bot[is].Graph.Bittrex_Time != now {
+					if Bot[is].Graph.Bittrex_Last > 0 {
+						Bot[is].Graph.Bittrex = append(Bot[is].Graph.Bittrex, Bot[is].Graph.Bittrex_Last)
+						l := len(Bot[is].Graph.Bittrex)
+						if l > 60 {
+							Bot[is].Graph.Bittrex = Bot[is].Graph.Bittrex[l-60:]
+						}
+					}
+					Bot[is].Graph.Bittrex_Time = now
+				}
+				Bot[is].Graph.Bittrex_Last = m.Price * USDTHB.Rate.THB
+				_tn(Bot[is].Graph.Bittrex_Time, " != ", now, " > ", _fs(Bot[is].Graph.Bittrex_Last))
 			}
 		}
 	}

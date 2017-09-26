@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	bitfinex "github.com/bitfinexcom/bitfinex-api-go/v1"
 )
@@ -57,11 +58,27 @@ func bitfinex_start() {
 	}
 }
 func bitfinex_listen(in chan []float64, crn string) {
+	CN := map[string]int64{"BTC": 1, "ETH": 21, "DAS": 22, "XRP": 25, "OMG": 26}
 	for {
 		msg := <-in
 		if len(msg) == 10 {
 			//	fmt.Println(crn, ": ", msg)
 			Bitfinex[crn] = msg
+
+			loc, _ := time.LoadLocation("Asia/Bangkok")
+			now := (time.Now().In(loc)).Format(time.Kitchen)
+			var is = CN[crn]
+			if Bot[is].Graph.Bitfinex_Time != now {
+				if Bot[is].Graph.Bitfinex_Last > 0 {
+					Bot[is].Graph.Bitfinex = append(Bot[is].Graph.Bitfinex, Bot[is].Graph.Bitfinex_Last)
+					l := len(Bot[is].Graph.Bitfinex)
+					if l > 60 {
+						Bot[is].Graph.Bitfinex = Bot[is].Graph.Bitfinex[l-60:]
+					}
+				}
+				Bot[is].Graph.Bitfinex_Time = now
+			}
+			Bot[is].Graph.Bitfinex_Last = msg[6] * USDTHB.Rate.THB
 		} else {
 			//fmt.Println("bitfinex /Unknown: ", msg)
 		}

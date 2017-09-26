@@ -120,6 +120,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					ajax["trans"] = Bot[pair].Trans
 					ajax["sims"] = Bot[pair].Sims
 					ajax["delay"] = Bot[pair].Delay
+					ajax["graph"] = Bot[pair].Graph
 					ajax["usdthb"] = USDTHB
 					ajax["bitfinex"] = Bitfinex
 					ajax["bittrex"] = Bittrex

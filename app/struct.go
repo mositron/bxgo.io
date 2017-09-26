@@ -10,6 +10,7 @@ var Bitfinex map[string][]float64
 var Bittrex map[string]GBittrex
 var USDTHB AUSDTHB
 var Conf GConf
+var Tmp map[int64]*ABot
 
 // each
 type ABot struct {
@@ -23,6 +24,7 @@ type ABot struct {
 	Sims     []ASims
 	Delay    ADelay
 	Min_Sell float64
+	Graph    AGraph
 }
 
 type AUSDTHB struct {
@@ -66,6 +68,7 @@ type AConfig struct {
 	Margin    float64
 	KEEP      map[string]float64
 }
+
 type GConf struct {
 	Theme  string
 	Line   string
@@ -76,6 +79,7 @@ type GConf struct {
 	TwoFA  string
 	Port   int64
 }
+
 type ATrend struct {
 	UP_Price_All   float64
 	UP_Vol_All     int64
@@ -99,6 +103,18 @@ type ATrend struct {
 	DOWN_AVG_10   float64
 	DOWN_SUM_10   float64
 	Price_AVG_10  float64
+}
+
+type AGraph struct {
+	BX            []float64
+	BX_Last       float64
+	BX_Time       string
+	Bittrex       []float64
+	Bittrex_Last  float64
+	Bittrex_Time  string
+	Bitfinex      []float64
+	Bitfinex_Last float64
+	Bitfinex_Time string
 }
 
 type AList struct {

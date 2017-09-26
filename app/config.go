@@ -14,6 +14,13 @@ func LoadIni() {
 		log.Fatal(err)
 	}
 	defer file.Close()
+	if len(Bot) > 0 {
+		Tmp = map[int64]*ABot{}
+		for i := range Bot {
+			Tmp[i] = &ABot{}
+			Tmp[i].Graph = Bot[i].Graph
+		}
+	}
 	Bot = map[int64]*ABot{}
 	Sort = []int64{}
 	Conf = GConf{}
@@ -101,5 +108,12 @@ func LoadIni() {
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
+	}
+
+	if len(Tmp) > 0 {
+		for i := range Tmp {
+			Bot[i].Graph = Tmp[i].Graph
+		}
+		Tmp = map[int64]*ABot{}
 	}
 }
