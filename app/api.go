@@ -257,7 +257,7 @@ func api_book(pair int64) {
 
 func api_trade(pair int64) {
 	Bot[pair].Delay.Refresh_Trade = _ir(30, 5)
-	resp, err := http.Get("https://bx.in.th/api/trade/?pairing=" + _is(pair) + "&limit=10")
+	resp, err := http.Get("https://bx.in.th/api/trade/?pairing=" + _is(pair) + "&limit=20")
 	if err != nil {
 		_err("api_trade - ", err.Error())
 		return
@@ -317,8 +317,8 @@ func api_trade(pair int64) {
 	}
 }
 
-func api_buy(pair int64, amount float64, rate float64) {
-	if Bot[pair].Delay.Next_Buy > 0 {
+func api_buy(ignore bool, pair int64, amount float64, rate float64) {
+	if !ignore && Bot[pair].Delay.Next_Buy > 0 {
 		return
 	}
 	Delay.Next_BuySell = 5
@@ -355,8 +355,8 @@ func api_buy(pair int64, amount float64, rate float64) {
 	}
 }
 
-func api_sell(pair int64, amount float64, rate float64) {
-	if Bot[pair].Delay.Next_Sell > 0 {
+func api_sell(ignore bool, pair int64, amount float64, rate float64) {
+	if !ignore && Bot[pair].Delay.Next_Sell > 0 {
 		return
 	}
 	Delay.Next_BuySell = 5

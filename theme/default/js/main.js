@@ -3,9 +3,8 @@ var tmr,tmn;
 var THB=0;
 var currency='THB';
 var data;
-var server='';
 var loaded=false;
-
+var pass='';
 function network(s){
   var t=$('.href_'+s.replace('/',''));
   if(t.length>0) {
@@ -19,9 +18,19 @@ function network(s){
   }
 }
 function sendorder(t){
+  pass=(t.save.value?t.password.value:'');
   $('#order_modal').modal('hide');
+  var act=t.action.value,q='pair='+pair+'&action='+act+'&pass='+encodeURIComponent(t.password.value);
+  if(act=='cancel'){
+    q+='&id='+t.id.value;
+  }else if(act=='order'){
+    q+='&type='+t.type.value;
+    q+='&rate='+t.rate.value;
+    q+='&amount='+t.amount.value;
+  }
+  t.reset();
   $.getJSON(
-    server+'/ajax/order?pair='+pair+'&action='+t.action.value+'&id='+t.id.value+'&pass='+t.password.value+'&callback=?',
+    '/ajax/order?'+q,
     function(da){
       $(da.target).popover({
         title:(da.success?'สำเร็จ':'ผิดพลาด'),
@@ -34,7 +43,7 @@ function sendorder(t){
 function _getData(){
   jQuery.ajax({
     type: "GET",
-    url: server+'/ajax/data?pair='+pair+'&callback=?',
+    url: '/ajax/data?pair='+pair+'&callback=?',
     dataType: "jsonp",
     success: function(da){
       var d = new Date,v;
@@ -138,7 +147,7 @@ function _getData(){
       var tmp='',si;
       $.each(data.order,function(k,v){
         si=_sim(v.order_type,v.rate,v.amount)
-        tmp+='<tr class="'+v.order_type+'"><td>'+v.order_type+'</td><td>'+_num(_fs(v.rate))+' <em>('+(v.order_type=='sell'?'<span class="red2">+'+_num(_fs(v.rate-data.pair.last_price))+'</span>':'<span class="green2">'+_num(_fs(v.rate-data.pair.last_price))+'</span>')+')</em></td><td>'+_num(v.amount)+'</td><td>'+v.date+'</td><td>'+si.do+'</td><td>'+si.profit+'</td><td width="20px"><button type="button" class="btn btn-dark" data-toggle="modal" data-target="#order_modal" data-action="cancel" data-id="'+v.order_id+'">X</button></td></tr>';
+        tmp+='<tr class="'+v.order_type+'"><td>'+v.order_type+'</td><td>'+_num(_fs(v.rate))+' <em>('+(v.order_type=='sell'?'<span class="red2">+'+_num(_fs(v.rate-data.pair.last_price))+'</span>':'<span class="green2">'+_num(_fs(v.rate-data.pair.last_price))+'</span>')+')</em></td><td>'+_num(v.amount)+'</td><td>'+v.date+'</td><td>'+si.do+'</td><td>'+si.profit+'</td><td width="20px"><button type="button" class="btn btn-bxgo" data-toggle="modal" data-target="#order_modal" data-action="cancel" data-id="'+v.order_id+'"><i class="fa fa-trash" aria-hidden="true"></i></button></td></tr>';
       });
       $('#order').html(tmp);
       $('#order_count').html('buy: '+$('#order>tr.buy').length+' / sell: '+$('#order>tr.sell').length);
@@ -303,12 +312,23 @@ var nav = {
     nav.go(null,window.location.href);
   }
 };
+function order_type(){
+  var type=$('.form-check-input[name=type]:checked').val();
+  if(type=='buy'){
+    $('#amount_type').html(data.pair.primary_currency);
+  }else if(type=='sell'){
+    $('#amount_type').html(data.pair.secondary_currency);
+  }
+}
 $(window).on('popstate',function(e){nav.popstate(e);});
 $(function(){
-  tmr = setInterval(_getData,delay*1000)
+  tmr=setInterval(_getData,delay*1000)
   _getData();
-  $('#order_modal').on('show.bs.modal', function (event) {
+  $('#order_modal').on('show.bs.modal',function(event){
     var btn = $(event.relatedTarget);
+    $('#order_password').val(pass);
+    $('#order_save').prop('checked',pass?true:false);
+    $('#order_buysell').css('display','none');
     if(btn.data('action')=='cancel'){
       $('#order_title').html('ลบคำสั่งซื่อ/ขาย');
       $('#order_id').val(btn.data('id'));
@@ -316,7 +336,12 @@ $(function(){
     else if(btn.data('action')=='config'){
       $('#order_title').html('Reload config.ini');
     }
+    else if(btn.data('action')=='order'){
+      $('#order_title').html('เพิ่มคำสั่งซื้อ/ขาย');
+      $('#order_buysell').css('display','block');
+      order_type();
+    }
     $('#order_action').val(btn.data('action'));
   });
   nav.load();
-})
+});

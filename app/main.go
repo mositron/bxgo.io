@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	VERSION = "0.4.7"
+	VERSION = "0.5.0 BETA"
 	log.SetFlags(0)
 	LoadIni()
 	if Conf.Key == "" || Conf.Secret == "" {
@@ -184,9 +184,9 @@ func process(pair int64) {
 					if int64(len(Bot[pair].Order)) < Bot[pair].Conf.Max_Order {
 						if Bot[pair].Conf.Budget <= Balance[Bot[pair].Pair.Primary].Available {
 							if sim.Order_Buy == 0 && sim.Order_Sell == 0 {
-								_tn(time.Now().Format(time.Stamp)+" : send buy - ", _fs(Bot[pair].Conf.Budget), " <= ", _fs(Balance[Bot[pair].Pair.Primary].Available), " - rate: ", _fs(_price(pair, sim.Buy)))
-								_tn(Bot[pair].Pair.Secondary, " - price = ", _fs(Bot[pair].Pair.Price))
-								api_buy(pair, Bot[pair].Conf.Budget, _price(pair, sim.Buy))
+								_tn(time.Now().Format(time.Stamp)+" : Send Buy(Auto) - ", _fs(Bot[pair].Conf.Budget), " <= ", _fs(Balance[Bot[pair].Pair.Primary].Available), " - Rate: ", _fs(_price(pair, sim.Buy)))
+								_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
+								api_buy(false, pair, Bot[pair].Conf.Budget, _price(pair, sim.Buy))
 							}
 						}
 					}
@@ -204,9 +204,9 @@ func process(pair int64) {
 				if rate < Bot[pair].Pair.Price {
 					rate = Bot[pair].Pair.Price
 				}
-				_tn(time.Now().Format(time.Stamp)+" : send sell - ", _fs(sell), " - rate: ", _fs(_price(pair, rate)))
-				_tn(Bot[pair].Pair.Secondary, " - price = ", _fs(Bot[pair].Pair.Price))
-				api_sell(pair, sell, _price(pair, rate))
+				_tn(time.Now().Format(time.Stamp)+" : Send Sell(Auto) - ", _fs(sell), " - Rate: ", _fs(_price(pair, rate)))
+				_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
+				api_sell(false, pair, sell, _price(pair, rate))
 			}
 		}
 	}

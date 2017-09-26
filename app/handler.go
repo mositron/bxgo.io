@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type MyHandler struct {
@@ -19,6 +20,10 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "BXGo v. "+VERSION)
 	CN := map[string]int64{"BTC": 1, "ETH": 21, "DAS": 22, "XRP": 25, "OMG": 26}
 	url := strings.Split(strings.TrimLeft(r.URL.Path, "/"), "/")
+	theme := strings.TrimSpace(r.URL.Query().Get("theme"))
+	if theme == "" {
+		theme = Conf.Theme
+	}
 	cmd := url[0]
 	if cmd == "ajax" {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
@@ -50,6 +55,47 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							target = "#delay"
 							success = true
 							message = "รีโหลดเรียบร้อยแล้ว... กรุณารอซักครู่เพื่ออัพเดทข้อมูล."
+						} else if action == "order" {
+							ty := r.URL.Query().Get("type")
+							if rate, err := strconv.ParseFloat(r.URL.Query().Get("rate"), 64); err == nil && rate > 0 {
+								if amount, err := strconv.ParseFloat(r.URL.Query().Get("amount"), 64); err == nil && amount > 0 {
+									if ty == "buy" {
+										if rate > Bot[pair].Pair.Price+(0.01*Bot[pair].Pair.Price) {
+											message = "ราคาสูงกว่าราคาปัจจุบันมากเกินไป. (ป้องกันการกรอกผิด)"
+										} else {
+											if amount > Balance[Bot[pair].Pair.Primary].Available {
+												message = "มี " + Bot[pair].Pair.Primary + " ไม่เพียงพอ. (" + _fs(amount) + " < " + _fs(Balance[Bot[pair].Pair.Primary].Available) + ")"
+											} else {
+												success = true
+												message = "ส่งคำสั่งซื้อขายแล้ว.. กรุณารอซํกครู่."
+												_tn(time.Now().Format(time.Stamp)+" : Send Buy(Manual) - ", _fs(amount), " - Rate: ", _fs(_price(pair, rate)))
+												_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
+												api_buy(true, pair, amount, _price(pair, rate))
+											}
+										}
+									} else if ty == "sell" {
+										if rate < Bot[pair].Pair.Price-(0.01*Bot[pair].Pair.Price) {
+											message = "ราคาต่ำกว่าราคาปัจจุบันมากเกินไป. (ป้องกันการกรอกผิด)"
+										} else {
+											if amount > Balance[Bot[pair].Pair.Secondary].Available {
+												message = "มี " + Bot[pair].Pair.Secondary + " ไม่เพียงพอ. (" + _fs(amount) + " < " + _fs(Balance[Bot[pair].Pair.Secondary].Available) + ")"
+											} else {
+												success = true
+												message = "ส่งคำสั่งซื้อขายแล้ว.. กรุณารอซํกครู่."
+												_tn(time.Now().Format(time.Stamp)+" : Send Sell(Manual) - ", _fs(amount), " - Rate: ", _fs(_price(pair, rate)))
+												_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
+												api_sell(true, pair, amount, _price(pair, rate))
+											}
+										}
+									}
+								} else {
+									message = "จำนวนไม่ถูกต้อง."
+								}
+							} else {
+								message = "ราคาไม่ถูกต้อง."
+							}
+							target = "#order"
+							//success = true
 						}
 					}
 					ajax["success"] = success
@@ -120,26 +166,36 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/theme/default/img/screenshot.png", 301)
 	} else if pa, ok := CN[cmd]; ok {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
-		dat, err := ioutil.ReadFile("theme/" + Conf.Theme + "/html/main.html")
-		ct := strings.Replace(string(dat), "{VERSION}", VERSION, -1)
-		ct = strings.Replace(ct, "{PAIR}", _is(pa), -1)
-		if err == nil {
-			w.Write([]byte(ct))
-		} else {
-			w.Write([]byte(err.Error()))
-		}
+		w.Write([]byte(strings.Replace(web_define(theme), "{PAIR}", _is(pa), -1)))
 	} else if cmd != "" {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(r.URL.Path + "\nFile Not Found\n----------------------------\nBXGo v. " + VERSION + "\npowered by positron@jarm.com"))
 	} else {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
-		dat, err := ioutil.ReadFile("theme/" + Conf.Theme + "/html/main.html")
-		ct := strings.Replace(string(dat), "{VERSION}", VERSION, -1)
-		ct = strings.Replace(ct, "{PAIR}", _is(Sort[0]), -1)
-		if err == nil {
-			w.Write([]byte(ct))
-		} else {
-			w.Write([]byte(err.Error()))
-		}
+		w.Write([]byte(strings.Replace(web_define(theme), "{PAIR}", _is(Sort[0]), -1)))
 	}
+}
+
+func web_define(theme string) string {
+	dat, err := ioutil.ReadFile("theme/" + theme + "/html/main.html")
+	if err != nil {
+		dat, _ = ioutil.ReadFile("theme/default/html/main.html")
+	}
+	ct := strings.Replace(string(dat), "{VERSION}", VERSION, -1)
+	favicon := "theme/" + theme + "/img/favicon.png"
+	if _, err := ioutil.ReadFile(favicon); err != nil {
+		favicon = "theme/default/img/favicon.png"
+	}
+	ct = strings.Replace(ct, "{IMG_FAVICON}", "/"+favicon, -1)
+	css := "theme/" + theme + "/css/main.css"
+	if _, err := ioutil.ReadFile(css); err != nil {
+		css = "theme/default/css/main.css"
+	}
+	ct = strings.Replace(ct, "{CSS}", "/"+css, -1)
+	js := "theme/" + theme + "/js/main.js"
+	if _, err := ioutil.ReadFile(js); err != nil {
+		js = "theme/default/js/main.js"
+	}
+	ct = strings.Replace(ct, "{JS}", "/"+js, -1)
+	return ct
 }

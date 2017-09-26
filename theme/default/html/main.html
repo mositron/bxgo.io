@@ -10,15 +10,16 @@
   <meta property="og:title" content="BXGo v. {VERSION} - แลกเปลี่ยนเหรียญบิทคอยน์อัตโนมัติ">
   <meta property="og:description" content="ราคาเหรียญบิทคอยน์ BTC DASH ETH OMG XRP แลกเปลี่ยนเหรียญอัตโนมัต">
   <meta property="og:image" content="/theme/default/img/screenshot.png" />
-  <link rel="shortcut icon" type="image/png" href="/theme/default/img/favicon.png" />
+  <link rel="shortcut icon" type="image/png" href="{IMG_FAVICON}" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Kanit:300&amp;subset=latin-ext,thai,vietnamese">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-  <link rel="stylesheet" href="/theme/default/css/main.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <link rel="stylesheet" href="{CSS}">
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
   <script>var pair='{PAIR}',ver='{VERSION}';</script>
-  <script src="/theme/default/js/main.js"></script>
+  <script src="{JS}"></script>
 </head>
 <body>
 
@@ -29,23 +30,25 @@
       <ul class="navbar-nav" id="pair"><li class="nav-item"><div class="nav-link">BX.in.th<br>Bitfinex<br>Bittrex<hr>Bitfinex<br>Bittrex</div></li></ul>
     </div>
   </nav>
-  <div id="waiting" style="text-align:center;font-size:36px;color:#000;text-shadow:1px 1px 0px #222;padding:100px 0px;">Loading...</div>
+  <div id="waiting">Loading...</div>
   <div id="ui" style="display:none">
-    <div class="line"><span>BXGo.io v. {VERSION}</span><span id="pairing"></span><span>Trending</span><small id="trend_trade"></small></div>
-    <div style="padding:5px">
-      <div class="trend">
-        <div class="box">
-          <div class="row">
-            <div class="col-sm-4"><strong>Price:</strong>  <span id="trend_10_price"></span> <em>(<span id="trend_10_change"></span>)</em></div>
-            <div class="col-sm-4"><strong>Bid:</strong>    <span class="green">+</span><span id="trend_10_bid_sell"></span> / <span class="red">-</span><span id="trend_10_bid_buy"></span></div>
-            <div class="col-sm-4"><strong>Volume:</strong> <span class="green">+</span><span id="trend_10_vol_sell"></span>% / <span class="red">-</span><span id="trend_10_vol_buy"></span>%</div>
+    <div class="layout">
+      <div class="line"><span>v. {VERSION}</span><span id="pairing"></span><small id="trend_trade"></small></div>
+      <div style="padding:5px">
+        <div class="trend">
+          <div class="box">
+            <div class="row">
+              <div class="col-sm-4"><strong>Price:</strong>  <span id="trend_10_price"></span> <em>(<span id="trend_10_change"></span>)</em></div>
+              <div class="col-sm-4"><strong>Bid:</strong>    <span class="green">+</span><span id="trend_10_bid_sell"></span> / <span class="red">-</span><span id="trend_10_bid_buy"></span></div>
+              <div class="col-sm-4"><strong>Volume:</strong> <span class="green">+</span><span id="trend_10_vol_sell"></span>% / <span class="red">-</span><span id="trend_10_vol_buy"></span>%</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-4">
-        <div class="stats">
+        <div class="stats layout">
           <div class="line"><span>BX.in.th</span><small id="time"></small></div>
           <div class="box">
             <div><strong>Price:</strong>  <span id="bx_price"></span> <em>(<span id="bx_change"></span>%)</em></div>
@@ -56,52 +59,56 @@
         </div>
       </div>
       <div class="col-sm-4">
-        <div class="stats">
+        <div class="stats layout">
           <div class="line"><span>Bitfinex.com</span><small class="usdthb"></small></div>
           <div class="box">
-            <div><strong>Price:</strong>  <span id="bfn_price"></span> <em>(<span id="bfn_change"></span>%)</em> <small style="float:right">~ <span id="bfn_price_usd"></span> USD</small></div>
+            <div><strong>Price:</strong>  <span id="bfn_price"></span> <em>(<span id="bfn_change"></span>%)</em> <small style="float:right">~ <span id="bfn_price_usd"></span> <i class="fa fa-usd" aria-hidden="true"></i></small></div>
             <div><strong>Volume:</strong> <span id="bfn_vol"></span></div>
-            <div><strong>Buy:</strong>    <span id="bfn_buy"></span> / <span id="bfn_buy_vol"></span> <small style="float:right">~ <span id="bfn_buy_usd"></span> USD</small></div>
-            <div><strong>Sell:</strong>   <span id="bfn_sell"></span> / <span id="bfn_sell_vol"></span> <small style="float:right">~ <span id="bfn_sell_usd"></span> USD</small></div>
+            <div><strong>Buy:</strong>    <span id="bfn_buy"></span> / <span id="bfn_buy_vol"></span> <small style="float:right">~ <span id="bfn_buy_usd"></span> <i class="fa fa-usd" aria-hidden="true"></i></small></div>
+            <div><strong>Sell:</strong>   <span id="bfn_sell"></span> / <span id="bfn_sell_vol"></span> <small style="float:right">~ <span id="bfn_sell_usd"></span> <i class="fa fa-usd" aria-hidden="true"></i></small></div>
           </div>
         </div>
       </div>
       <div class="col-sm-4">
-        <div class="stats">
+        <div class="stats layout">
           <div class="line"><span>Bittrex.com</span><small class="usdthb"></small></div>
           <div class="box">
-            <div><strong>Price:</strong>  <span id="btx_price"></span> <em>(<span id="btx_change"></span>%)</em> <small style="float:right">~ <span id="btx_price_usd"></span> USD</small></div>
+            <div><strong>Price:</strong>  <span id="btx_price"></span> <em>(<span id="btx_change"></span>%)</em> <small style="float:right">~ <span id="btx_price_usd"></span> <i class="fa fa-usd" aria-hidden="true"></i></small></div>
             <div><strong>Volume:</strong> <span id="btx_vol"></span></div>
-            <div><strong>Buy:</strong>    <span id="btx_buy"></span> / <span id="btx_buy_vol"></span> <small style="float:right">~ <span id="btx_buy_usd"></span> USD</small></div>
-            <div><strong>Sell:</strong>   <span id="btx_sell"></span> / <span id="btx_sell_vol"></span> <small style="float:right">~ <span id="btx_sell_usd"></span> USD</small></div>
+            <div><strong>Buy:</strong>    <span id="btx_buy"></span> / <span id="btx_buy_vol"></span> <small style="float:right">~ <span id="btx_buy_usd"></span> <i class="fa fa-usd" aria-hidden="true"></i></small></div>
+            <div><strong>Sell:</strong>   <span id="btx_sell"></span> / <span id="btx_sell_vol"></span> <small style="float:right">~ <span id="btx_sell_usd"></span> <i class="fa fa-usd" aria-hidden="true"></i></small></div>
           </div>
         </div>
       </div>
       <div class="col-sm-7">
-        <div class="order">
-          <div class="line"><span>Orders</span><small id="order_count"></small></div>
-          <div class="max-height">
-            <table class="table table-striped table-sm table-responsive">
-              <thead><tr><th>Type</th><th>Rate</th><th>Amount</th><th>Date</th><th>Sim.</th><th>Sim-Profit</th><th width="20"></th></tr></thead>
-              <tbody id="order"></tbody>
-            </table>
+        <div class="order layout">
+          <div class="line"><span>Orders</span><small><span id="order_count"></span> <button type="button" class="btn btn-bxgo" data-toggle="modal" data-target="#order_modal" data-action="order"><i class="fa fa-plus" aria-hidden="true"></i></button></small></div>
+          <div class="box">
+            <div class="max-height">
+              <table class="table table-striped table-sm table-responsive">
+                <thead><tr><th>Type</th><th>Rate</th><th>Amount</th><th>Date</th><th>Sim.</th><th>Sim-Profit</th><th width="20"></th></tr></thead>
+                <tbody id="order"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
       <div class="col-sm-5">
-        <div class="transaction">
+        <div class="transaction layout">
           <div class="line"><span>Transactions</span><small id="history_count"></small></div>
-          <div class="max-height">
-            <table class="table table-striped table-sm table-responsive">
-              <thead><tr><th class="primary_currency"></th><th class="secondary_currency"></th><th>Fee</th><th>Date</th></tr></thead>
-              <tbody id="history"></tbody>
-            </table>
+          <div class="box">
+            <div class="max-height">
+              <table class="table table-striped table-sm table-responsive">
+                <thead><tr><th class="primary_currency"></th><th class="secondary_currency"></th><th>Fee</th><th>Date</th></tr></thead>
+                <tbody id="history"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
       <div class="col-sm-5">
-        <div class="conf">
-          <div class="line"><span>Config</span><small><span id="delay"></span> <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#order_modal" data-action="config">R</button></small></div>
+        <div class="conf layout">
+          <div class="line"><span>Config</span><small><span id="delay"></span> <button type="button" class="btn btn-bxgo" data-toggle="modal" data-target="#order_modal" data-action="config"><i class="fa fa-refresh" aria-hidden="true"></i></button></small></div>
           <div class="box">
             <div class="row">
               <div class="col-sm-6"><strong>Auto Trade:</strong>  <span id="conf_enable"></span></div>
@@ -115,19 +122,21 @@
         </div>
       </div>
       <div class="col-sm-7">
-        <div class="sim">
+        <div class="sim layout">
           <div class="line"><span>Simulations</span><small>Excluding Fee.</small></div>
-          <div class="max-height">
-            <table class="table table-striped table-sm table-responsive">
-              <thead><tr><th><span></span> Buy</th><th>Sell</th><th>Margin</th><th>Coin</th><th>Profit</th><th>Cycle</th></tr></thead>
-              <tbody id="sims"></tbody>
-            </table>
+          <div class="box">
+            <div class="max-height">
+              <table class="table table-striped table-sm table-responsive">
+                <thead><tr><th><span></span> Buy</th><th>Sell</th><th>Margin</th><th>Coin</th><th>Profit</th><th>Cycle</th></tr></thead>
+                <tbody id="sims"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div id="mywall" style="display:none">
+  <div id="mywall" class="layout" style="display:none">
     <div class="line"><span>Wallet</span></div>
     <div class="box"><div id="wallet" class="row"></div></div>
   </div>
@@ -137,12 +146,12 @@
     <div class="row">
       <div class="col-md-6">
         <h5><a href="https://bxgo.io" target="_blank">BXGo.io</a></h5>
-        by positron@jarm.com<br>
-        Facebook: <a href="https://www.facebook.com/positron.th" target="_blank">facebook.com/positron.th</a><br>
-        Download / Github: <a href="https://github.com/positronth/bxgo.io" target="_blank">github.com/positronth/bxgo.io</a>
+        <i class="fa fa-user-o" aria-hidden="true"></i> positron@jarm.com<br>
+        <i class="fa fa-facebook-official" aria-hidden="true"></i> <a href="https://www.facebook.com/positron.th" target="_blank">facebook.com/positron.th</a><br>
+        <i class="fa fa-github" aria-hidden="true"></i> <a href="https://github.com/positronth/bxgo.io" target="_blank">github.com/positronth/bxgo.io</a>
       </div>
       <div class="col-md-6">
-        <h5>Donate</h5>
+        <h5><i class="fa fa-btc" aria-hidden="true"></i> Donate</h5>
         BTC: 1GkpiiQWKg99MMw1Srbq9hxTqwRHwVzBTw<br>
         ETH: 0x93d3B5c2843e6752772EB208cBA0feD44D0211F4<br>
         OMG: 0x93d3B5c2843e6752772EB208cBA0feD44D0211F4
@@ -161,10 +170,46 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body"><input type="hidden" id="order_action" name="action">
-          <div class="form-group"><input type="hidden" id="order_id" name="id">
-            <label for="recipient-name" class="form-control-label">รหัสผ่านสำหรับคำสั่ง:</label>
-            <input type="password" class="form-control" id="order_password" name="password">
+        <div class="modal-body">
+          <input type="hidden" id="order_action" name="action">
+          <input type="hidden" id="order_id" name="id">
+          <div id="order_buysell" style="display:none;">
+            <div class="form-group">
+              <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input" type="radio" name="type" value="buy" onclick="order_type()" checked> Buy
+                </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input" type="radio" name="type" value="sell" onclick="order_type()"> Sell
+                </label>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="form-control-label col-2">ราคา:</label>
+              <div class="col-8">
+                <input type="text" class="form-control form-control-sm" name="rate">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="form-control-label col-2">จำนวน:</label>
+              <div class="col-8">
+                <input type="text" class="form-control form-control-sm" name="amount">
+              </div>
+              <div id="amount_type"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="order_password" class="form-control-label">รหัสผ่านสำหรับคำสั่ง:</label>
+            <input type="password" class="form-control form-control-sm" id="order_password" autocomplete="false" name="password">
+          </div>
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="order_save" name="save" value="1"> บันทึกรหัสผ่านสำหรับครั้งต่อไป
+              </label>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
