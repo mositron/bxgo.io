@@ -4,12 +4,14 @@
 โปรแกรมนี้พัฒนาด้วยภาษา GO ซึ่งสามารถ compile เพื่อนำไปใช้งานได้ทั้ง Windows, macOS และ Linux หรือจะเรียกใช้งานผ่าน Docker ได้ที่ positron/bxgo.io(เร็วๆนี้)
 
 ## Download
-ดาวน์โหลด โปรแกรมพร้อมใช้ หรือ source code ได้ที่หน้า [https://github.com/positronth/bxgo.io/releases](https://github.com/positronth/bxgo.io/releases)
+ดาวน์โหลด โปรแกรมพร้อมใช้ หรือ source code ได้ที่หน้า [Releases](https://github.com/positronth/bxgo.io/releases)
 
 ## ตัวอย่าง
 [https://bxgo.io/](https://bxgo.io/)
 
 ![Screenshot](https://github.com/positronth/bxgo.io/raw/master/theme/default/img/screenshot.png)  
+
+![Screenshot](https://github.com/positronth/bxgo.io/raw/master/theme/white/img/screenshot.png)  
 
 ## 1 USD = ?
 บอทจะอ้างอิงราคาเงินบาทจากเว็บ fixer.io ([หน้า Api](http://api.fixer.io/latest?base=USD&symbols=THB))  
@@ -21,7 +23,7 @@
 ในการติดตั้งครั้งแรก จะต้องเพิ่มค่าคอนฟิคให้โปรแกรมคือ  
 key + secret ---- ได้จากการสร้างคีย์ใหม่ใน  https://bx.in.th/account  
 pass ---- รหัสอะไรก็ได้ สำหรับการยืนยันการสั่งลบการซื้อขาย  
-  
+
 ```
 # พอร์ทสำหรับหน้าเว็บเพื่อแสดงการทำงาน
 port = 8000
