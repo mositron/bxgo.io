@@ -38,7 +38,10 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					password := r.URL.Query().Get("pass")
 					if password != "" && password == Conf.Pass {
 						if action == "cancel" {
-							if id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64); err == nil && id > 0 {
+							if Conf.Key == "" || Conf.Secret == "" {
+								target = "#order"
+								message = "กรุณากรอก Key/Secret ก่อนใช้งานส่วนนี้."
+							} else if id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64); err == nil && id > 0 {
 								for i := range Bot[pair].Order {
 									if Bot[pair].Order[i].ID == id {
 										target = "#order"
@@ -56,46 +59,49 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							success = true
 							message = "รีโหลดเรียบร้อยแล้ว... กรุณารอซักครู่เพื่ออัพเดทข้อมูล."
 						} else if action == "order" {
-							ty := r.URL.Query().Get("type")
-							if rate, err := strconv.ParseFloat(r.URL.Query().Get("rate"), 64); err == nil && rate > 0 {
-								if amount, err := strconv.ParseFloat(r.URL.Query().Get("amount"), 64); err == nil && amount > 0 {
-									if ty == "buy" {
-										if rate > Bot[pair].Pair.Price+(0.01*Bot[pair].Pair.Price) {
-											message = "ราคาสูงกว่าราคาปัจจุบันมากเกินไป. (ป้องกันการกรอกผิด)"
-										} else {
-											if amount > Balance[Bot[pair].Pair.Primary].Available {
-												message = "มี " + Bot[pair].Pair.Primary + " ไม่เพียงพอ. (" + _fs(amount) + " < " + _fs(Balance[Bot[pair].Pair.Primary].Available) + ")"
+							if Conf.Key == "" || Conf.Secret == "" {
+								message = "กรุณากรอก Key/Secret ก่อนใช้งานส่วนนี้."
+							} else {
+								ty := r.URL.Query().Get("type")
+								if rate, err := strconv.ParseFloat(r.URL.Query().Get("rate"), 64); err == nil && rate > 0 {
+									if amount, err := strconv.ParseFloat(r.URL.Query().Get("amount"), 64); err == nil && amount > 0 {
+										if ty == "buy" {
+											if rate > Bot[pair].Pair.Price+(0.01*Bot[pair].Pair.Price) {
+												message = "ราคาสูงกว่าราคาปัจจุบันมากเกินไป. (ป้องกันการกรอกผิด)"
 											} else {
-												success = true
-												message = "ส่งคำสั่งซื้อขายแล้ว.. กรุณารอซํกครู่."
-												_tn(time.Now().Format(time.Stamp)+" : Send Buy(Manual) - ", _fs(amount), " - Rate: ", _fs(_price(pair, rate)))
-												_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
-												api_buy(true, pair, amount, _price(pair, rate))
+												if amount > Balance[Bot[pair].Pair.Primary].Available {
+													message = "มี " + Bot[pair].Pair.Primary + " ไม่เพียงพอ. (" + _fs(amount) + " < " + _fs(Balance[Bot[pair].Pair.Primary].Available) + ")"
+												} else {
+													success = true
+													message = "ส่งคำสั่งซื้อขายแล้ว.. กรุณารอซํกครู่."
+													_tn(time.Now().Format(time.Stamp)+" : Send Buy(Manual) - ", _fs(amount), " - Rate: ", _fs(_price(pair, rate)))
+													_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
+													api_buy(true, pair, amount, _price(pair, rate))
+												}
+											}
+										} else if ty == "sell" {
+											if rate < Bot[pair].Pair.Price-(0.01*Bot[pair].Pair.Price) {
+												message = "ราคาต่ำกว่าราคาปัจจุบันมากเกินไป. (ป้องกันการกรอกผิด)"
+											} else {
+												if amount > Balance[Bot[pair].Pair.Secondary].Available {
+													message = "มี " + Bot[pair].Pair.Secondary + " ไม่เพียงพอ. (" + _fs(amount) + " < " + _fs(Balance[Bot[pair].Pair.Secondary].Available) + ")"
+												} else {
+													success = true
+													message = "ส่งคำสั่งซื้อขายแล้ว.. กรุณารอซํกครู่."
+													_tn(time.Now().Format(time.Stamp)+" : Send Sell(Manual) - ", _fs(amount), " - Rate: ", _fs(_price(pair, rate)))
+													_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
+													api_sell(true, pair, amount, _price(pair, rate))
+												}
 											}
 										}
-									} else if ty == "sell" {
-										if rate < Bot[pair].Pair.Price-(0.01*Bot[pair].Pair.Price) {
-											message = "ราคาต่ำกว่าราคาปัจจุบันมากเกินไป. (ป้องกันการกรอกผิด)"
-										} else {
-											if amount > Balance[Bot[pair].Pair.Secondary].Available {
-												message = "มี " + Bot[pair].Pair.Secondary + " ไม่เพียงพอ. (" + _fs(amount) + " < " + _fs(Balance[Bot[pair].Pair.Secondary].Available) + ")"
-											} else {
-												success = true
-												message = "ส่งคำสั่งซื้อขายแล้ว.. กรุณารอซํกครู่."
-												_tn(time.Now().Format(time.Stamp)+" : Send Sell(Manual) - ", _fs(amount), " - Rate: ", _fs(_price(pair, rate)))
-												_tn(Bot[pair].Pair.Secondary, " - Current Price = ", _fs(Bot[pair].Pair.Price))
-												api_sell(true, pair, amount, _price(pair, rate))
-											}
-										}
+									} else {
+										message = "จำนวนไม่ถูกต้อง."
 									}
 								} else {
-									message = "จำนวนไม่ถูกต้อง."
+									message = "ราคาไม่ถูกต้อง."
 								}
-							} else {
-								message = "ราคาไม่ถูกต้อง."
 							}
 							target = "#order"
-							//success = true
 						}
 					}
 					ajax["success"] = success
@@ -120,7 +126,6 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					ajax["trans"] = Bot[pair].Trans
 					ajax["sims"] = Bot[pair].Sims
 					ajax["delay"] = Bot[pair].Delay
-					ajax["graph"] = Bot[pair].Graph
 					ajax["usdthb"] = USDTHB
 					ajax["bitfinex"] = Bitfinex
 					ajax["bittrex"] = Bittrex

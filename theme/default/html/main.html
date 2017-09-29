@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 <head>
   <title>BXGo v. {VERSION} - แลกเปลี่ยนเหรียญบิทคอยน์ BTC DASH ETH OMG XRP อัตโนมัติ</title>
   <meta name="description" content="ราคาเหรียญบิทคอยน์ BTC DASH ETH OMG XRP แลกเปลี่ยนเหรียญอัตโนมัติ">
@@ -24,29 +24,34 @@
 </head>
 <body>
 
-<div id="body" class="container-fluid">
+<div id="body" class="container">
   <nav class="navbar navbar-expand">
     <a class="navbar-brand" href="https://bxgo.io/">BXGo.io</a>
     <div class="collapse navbar-collapse" id="navbarNetwork">
-      <ul class="navbar-nav" id="pair"><li class="nav-item"><div class="nav-link">BX.in.th<br>Bitfinex<br>Bittrex<hr>Bitfinex<br>Bittrex</div></li></ul>
+      <ul class="navbar-nav" id="pair"><li class="nav-item"><div class="nav-link"><br>BX.in.th<br>Bitfinex<br>Bittrex<hr>Bitfinex<br>Bittrex</div></li></ul>
     </div>
   </nav>
   <div id="waiting">Loading...</div>
   <div id="ui" style="display:none">
-    <div class="line"><span>v. {VERSION}</span><span id="pairing"></span><small id="trend_trade"></small></div>
     <div class="row">
       <div class="col-sm-4">
+        <div class="line"><span>v. {VERSION}</span><span id="pairing"></span><small id="trend_trade"></small></div>
         <div class="trend layout">
-          <div class="line"><span>Trending</span></div>
           <div class="box">
             <div><strong>Price:</strong>  <span id="trend_10_price"></span> <em>(<span id="trend_10_change"></span>)</em></div>
-            <div><strong>Bid:</strong>    <span class="green">+</span><span id="trend_10_bid_sell"></span> / <span class="red">-</span><span id="trend_10_bid_buy"></span></div>
-            <div><strong>Volume:</strong> <span class="green">+</span><span id="trend_10_vol_sell"></span>% / <span class="red">-</span><span id="trend_10_vol_buy"></span>%</div>
+            <div><strong>Bid:</strong>    <span class="green">+</span><span id="trend_10_bid_sell"></span></div>
+            <div><strong>Bid Volume:</strong>    <span class="green">+</span><span id="trend_10_vol_sell"></span>%</div>
+            <div><strong>Ask:</strong>    <span class="red">-</span><span id="trend_10_bid_buy"></span></div>
+            <div><strong>Ask Volume:</strong>    <span class="red">-</span><span id="trend_10_vol_buy"></span>%</div>
           </div>
         </div>
       </div>
       <div class="col-sm-8">
-        <canvas id="graph" style="width:100%;height:150px;"></canvas>
+        <ul class="nav nav-tabs justify-content-end" id="nav-curr">
+          <li class="nav-item"><a class="nav-link nav-usd" onclick="_curr('usd')" href="javascript:;">USD</a></li>
+          <li class="nav-item"><a class="nav-link nav-thb active" onclick="_curr('thb')" href="javascript:;">THB</a></li>
+        </ul>
+        <div style="height:150px;"><canvas id="graph" style="width:100%;height:150px;" height="150"></canvas></div>
       </div>
       <div class="col-sm-4">
         <div class="stats layout">
@@ -143,7 +148,7 @@
   </div>
 </div>
 <div id="footer">
-  <div class="container-fluid">
+  <div class="container">
     <div class="row">
       <div class="col-md-6">
         <h5><a href="https://bxgo.io" target="_blank">BXGo.io</a></h5>
@@ -160,7 +165,6 @@
     </div>
   </div>
 </div>
-
 <div class="modal fade" id="order_modal" tabindex="-1" role="dialog" aria-labelledby="order_title" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -221,6 +225,5 @@
     </div>
   </div>
 </div>
-
 </body>
 </html>

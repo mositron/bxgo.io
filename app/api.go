@@ -59,22 +59,10 @@ func api_pair() {
 	if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
 		n = n.In(loc)
 	}
-	now := strconv.Itoa(n.Hour()) + ":" + strconv.Itoa(n.Minute())
 	for i := range pair {
 		if is, err := strconv.ParseInt(i, 10, 64); err == nil {
 			if _, ok := Bot[is]; ok {
 				Bot[is].Pair = pair[i]
-				if Bot[is].Graph.BX_Time != now {
-					if Bot[is].Graph.BX_Last > 0 {
-						Bot[is].Graph.BX = append(Bot[is].Graph.BX, Bot[is].Graph.BX_Last)
-						l := len(Bot[is].Graph.BX)
-						if l > 60 {
-							Bot[is].Graph.BX = Bot[is].Graph.BX[l-60:]
-						}
-					}
-					Bot[is].Graph.BX_Time = now
-				}
-				Bot[is].Graph.BX_Last = pair[i].Price
 			}
 		}
 	}
@@ -82,137 +70,137 @@ func api_pair() {
 
 func api_balance() {
 	Delay.Refresh_Balance = _ir(10, 2)
-	rsp, err := http.Post(Conf.URL+"balance", "application/x-www-form-urlencoded", bytes.NewBufferString(get_body().Encode()))
-	if err != nil {
-		_err("api_balance - Post - ", err.Error())
-		return
-	}
-	defer rsp.Body.Close()
-	ct, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		_err("api_balance - ioutil - ", err.Error())
-		return
-	}
-	ct = bytes.Replace(ct, []byte(`":"`), []byte(`":`), -1)
-	ct = bytes.Replace(ct, []byte(`","`), []byte(`,"`), -1)
-	ct = bytes.Replace(ct, []byte(`"}`), []byte(`}`), -1)
-	var dat UIBalance
-	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_balance - Unmarshal - ", err.Error(), string(ct))
-		return
-	}
-	if dat.Success == true {
-		Balance = dat.Balance
+	if Conf.Key != "" && Conf.Secret != "" {
+		rsp, err := http.Post(Conf.URL+"balance", "application/x-www-form-urlencoded", bytes.NewBufferString(get_body().Encode()))
+		if err != nil {
+			_err("api_balance - Post - ", err.Error())
+			return
+		}
+		defer rsp.Body.Close()
+		ct, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			_err("api_balance - ioutil - ", err.Error())
+			return
+		}
+		ct = bytes.Replace(ct, []byte(`":"`), []byte(`":`), -1)
+		ct = bytes.Replace(ct, []byte(`","`), []byte(`,"`), -1)
+		ct = bytes.Replace(ct, []byte(`"}`), []byte(`}`), -1)
+		var dat UIBalance
+		if err := json.Unmarshal(ct, &dat); err != nil {
+			_err("api_balance - Unmarshal - ", err.Error(), string(ct))
+			return
+		}
+		if dat.Success == true {
+			Balance = dat.Balance
+		}
 	}
 }
 
 func api_order(pair int64) {
 	Bot[pair].Delay.Refresh_Order = _ir(30, 5)
-	form := get_body()
-	form.Add("pairing", _is(pair))
-	rsp, err := http.Post(Conf.URL+"getorders", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
-	if err != nil {
-		_err("api_order - Post - ", err.Error())
-		return
-	}
-	defer rsp.Body.Close()
-	ct, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		_err("api_order - ioutil - ", err.Error())
-		return
-	}
-	var dat UIOrder
-	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_order - Unmarshal - ", err.Error(), string(ct))
-		return
-	}
-	if dat.Success == true {
-		Bot[pair].Order = []AOrder{}
-		found := false
-		min_sell := 0.0
-		for i := range dat.Order {
-			Bot[pair].Order = append(Bot[pair].Order, dat.Order[i])
-			//if dat.Order[i].Type == "sell" {
-			if !found {
-				min_sell = dat.Order[i].Rate
-				found = true
-			} else {
-				if dat.Order[i].Rate < min_sell {
+	if Conf.Key != "" && Conf.Secret != "" {
+		form := get_body()
+		form.Add("pairing", _is(pair))
+		rsp, err := http.Post(Conf.URL+"getorders", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+		if err != nil {
+			_err("api_order - Post - ", err.Error())
+			return
+		}
+		defer rsp.Body.Close()
+		ct, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			_err("api_order - ioutil - ", err.Error())
+			return
+		}
+		var dat UIOrder
+		if err := json.Unmarshal(ct, &dat); err != nil {
+			_err("api_order - Unmarshal - ", err.Error(), string(ct))
+			return
+		}
+		if dat.Success == true {
+			Bot[pair].Order = []AOrder{}
+			found := false
+			min_sell := 0.0
+			for i := range dat.Order {
+				Bot[pair].Order = append(Bot[pair].Order, dat.Order[i])
+				if !found {
 					min_sell = dat.Order[i].Rate
+					found = true
+				} else {
+					if dat.Order[i].Rate < min_sell {
+						min_sell = dat.Order[i].Rate
+					}
 				}
 			}
-		}
-		if found {
-			Bot[pair].Min_Sell = min_sell
-		} else {
-			Bot[pair].Min_Sell = 0
+			if found {
+				Bot[pair].Min_Sell = min_sell
+			} else {
+				Bot[pair].Min_Sell = 0
+			}
 		}
 	}
 }
 
 func api_history() {
 	Delay.Refresh_History = _ir(30, 5)
-	rsp, err := http.Post(Conf.URL+"history", "application/x-www-form-urlencoded", bytes.NewBufferString(get_body().Encode()))
-	if err != nil {
-		_err("api_history - Post - ", err.Error())
-		return
-	}
-	defer rsp.Body.Close()
-	ct, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		_err("api_history - ioutil - ", err.Error())
-		return
-	}
-	//transaction_id":"
-	ct = bytes.Replace(ct, []byte(`transaction_id":"`), []byte(`transaction_id":`), -1)
-	ct = bytes.Replace(ct, []byte(`","currency"`), []byte(`,"currency"`), -1)
-	ct = bytes.Replace(ct, []byte(`"amount":"`), []byte(`"amount":`), -1)
-	ct = bytes.Replace(ct, []byte(`","date"`), []byte(`,"date"`), -1)
-
-	//fmt.Println(string(ct))
-
-	var dat UIHistory
-	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_history - Unmarshal - ", err.Error(), string(ct))
-		return
-	}
-	if dat.Success == true {
-		for j := range Bot {
-			Bot[j].Trans = []ATrans{}
+	if Conf.Key != "" && Conf.Secret != "" {
+		rsp, err := http.Post(Conf.URL+"history", "application/x-www-form-urlencoded", bytes.NewBufferString(get_body().Encode()))
+		if err != nil {
+			_err("api_history - Post - ", err.Error())
+			return
 		}
-
-		line := ATrans{}
-		date := ""
-		idx := 0
-		for i := range dat.Transaction {
-			if date != dat.Transaction[i].Date {
-				date = dat.Transaction[i].Date
-				line = ATrans{}
-				line.Date = dat.Transaction[i].Date
-				idx = 1
+		defer rsp.Body.Close()
+		ct, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			_err("api_history - ioutil - ", err.Error())
+			return
+		}
+		ct = bytes.Replace(ct, []byte(`transaction_id":"`), []byte(`transaction_id":`), -1)
+		ct = bytes.Replace(ct, []byte(`","currency"`), []byte(`,"currency"`), -1)
+		ct = bytes.Replace(ct, []byte(`"amount":"`), []byte(`"amount":`), -1)
+		ct = bytes.Replace(ct, []byte(`","date"`), []byte(`,"date"`), -1)
+		var dat UIHistory
+		if err := json.Unmarshal(ct, &dat); err != nil {
+			_err("api_history - Unmarshal - ", err.Error(), string(ct))
+			return
+		}
+		if dat.Success == true {
+			for j := range Bot {
+				Bot[j].Trans = []ATrans{}
 			}
-			if dat.Transaction[i].Type == "trade" {
-				if line.Primary == 0 {
-					line.Primary = dat.Transaction[i].Amout
-					line.Primary_Currency = dat.Transaction[i].Currency
-					idx++
-				} else if line.Secondary == 0 {
-					line.Secondary = dat.Transaction[i].Amout
-					line.Secondary_Currency = dat.Transaction[i].Currency
+			line := ATrans{}
+			date := ""
+			idx := 0
+			for i := range dat.Transaction {
+				if date != dat.Transaction[i].Date {
+					date = dat.Transaction[i].Date
+					line = ATrans{}
+					line.Date = dat.Transaction[i].Date
+					idx = 1
+				}
+				if dat.Transaction[i].Type == "trade" {
+					if line.Primary == 0 {
+						line.Primary = dat.Transaction[i].Amout
+						line.Primary_Currency = dat.Transaction[i].Currency
+						idx++
+					} else if line.Secondary == 0 {
+						line.Secondary = dat.Transaction[i].Amout
+						line.Secondary_Currency = dat.Transaction[i].Currency
+						idx++
+					}
+				} else if dat.Transaction[i].Type == "fee" {
+					line.Fee = dat.Transaction[i].Amout
 					idx++
 				}
-			} else if dat.Transaction[i].Type == "fee" {
-				line.Fee = dat.Transaction[i].Amout
-				idx++
-			}
-			if idx == 4 {
-				for j := range Bot {
-					if Bot[j].Pair.Primary == line.Primary_Currency && Bot[j].Pair.Secondary == line.Secondary_Currency {
-						Bot[j].Trans = append(Bot[j].Trans, line)
-						break
-					} else if Bot[j].Pair.Primary == line.Secondary_Currency && Bot[j].Pair.Secondary == line.Primary_Currency {
-						Bot[j].Trans = append(Bot[j].Trans, ATrans{Date: line.Date, Fee: line.Fee, Primary: line.Secondary, Secondary: line.Primary})
-						break
+				if idx == 4 {
+					for j := range Bot {
+						if Bot[j].Pair.Primary == line.Primary_Currency && Bot[j].Pair.Secondary == line.Secondary_Currency {
+							Bot[j].Trans = append(Bot[j].Trans, line)
+							break
+						} else if Bot[j].Pair.Primary == line.Secondary_Currency && Bot[j].Pair.Secondary == line.Primary_Currency {
+							Bot[j].Trans = append(Bot[j].Trans, ATrans{Date: line.Date, Fee: line.Fee, Primary: line.Secondary, Secondary: line.Primary})
+							break
+						}
 					}
 				}
 			}
@@ -231,20 +219,14 @@ func api_book(pair int64) {
 	ct = bytes.Replace(ct, []byte(`["`), []byte(`[`), -1)
 	ct = bytes.Replace(ct, []byte(`","`), []byte(`,`), -1)
 	ct = bytes.Replace(ct, []byte(`"]`), []byte(`]`), -1)
-	//fmt.Println(string(ct))
-	//  "bids":[["315.12000000","8.68529632"],["
-
 	if err := json.Unmarshal(ct, &Bot[pair].Book); err != nil {
 		_err("api_book - Unmarshal - ", err.Error())
 		return
 	}
-
 	up_vol := 0.0
 	down_vol := 0.0
-
 	Bot[pair].Trend.UP_SUM_All = 0.0
 	Bot[pair].Trend.DOWN_SUM_All = 0.0
-
 	for i := range Bot[pair].Book.Bids {
 		md, _ := Bot[pair].Book.Bids[i].([]interface{})
 		down_vol += md[1].(float64)
@@ -255,7 +237,6 @@ func api_book(pair int64) {
 		up_vol += md[1].(float64)
 		Bot[pair].Trend.UP_SUM_All += md[0].(float64) * md[1].(float64)
 	}
-
 	if down_vol > 0 && up_vol > 0 {
 		Bot[pair].Trend.DOWN_AVG_All = _price(pair, Bot[pair].Trend.DOWN_SUM_All/down_vol)
 		Bot[pair].Trend.UP_AVG_All = _price(pair, Bot[pair].Trend.UP_SUM_All/up_vol)
@@ -287,22 +268,17 @@ func api_trade(pair int64) {
 	ct = bytes.Replace(ct, []byte(`","seconds`), []byte(`,"seconds`), -1)
 	ct = bytes.Replace(ct, []byte(`seconds":"`), []byte(`seconds":`), -1)
 	ct = bytes.Replace(ct, []byte(`"},{"trade_id`), []byte(`},{"trade_id`), -1)
-
-	//fmt.Println(string(ct))
 	var dat UITrade
 	if err := json.Unmarshal(ct, &dat); err != nil {
 		_err("api_trade - Unmarshal - ", err.Error(), string(ct))
 		return
 	}
-	//fmt.Println(dat)
 	trade_vol := 0.0
 	up_vol := 0.0
 	down_vol := 0.0
-
 	Bot[pair].Trend.TRADE_SUM = 0.0
 	Bot[pair].Trend.UP_SUM_10 = 0.0
 	Bot[pair].Trend.DOWN_SUM_10 = 0.0
-
 	for i := range dat.Complete {
 		trade_vol += dat.Complete[i].Amout
 		Bot[pair].Trend.TRADE_SUM += dat.Complete[i].Amout * dat.Complete[i].Rate
@@ -334,35 +310,36 @@ func api_buy(ignore bool, pair int64, amount float64, rate float64) {
 	}
 	Delay.Next_BuySell = 5
 	Bot[pair].Delay.Next_Buy = 60
-
-	form := get_body()
-	form.Add("pairing", _is(pair))
-	form.Add("type", "buy")
-	form.Add("amount", _fs(amount))
-	form.Add("rate", _fs(rate))
-	rsp, err := http.Post(Conf.URL+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
-	if err != nil {
-		_err("api_buy - Post - ", err.Error())
-		return
-	}
-	Bot[pair].Delay.Next_Buy = 300
-	Bot[pair].Delay.Next_Sell = Bot[pair].Delay.Next_Sell + 5
-	defer rsp.Body.Close()
-	ct, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		_err("api_buy - ioutil - ", err.Error())
-		return
-	}
-	fmt.Println(string(ct))
-	var dat UIOrder
-	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_buy - Unmarshal - ", err.Error())
-		return
-	}
-	Bot[pair].Delay.Next_Sell = Bot[pair].Delay.Next_Sell + 5
-	Bot[pair].Delay.Refresh_Order = 3
-	if dat.Success == true {
-		api_line("Buy - " + Bot[pair].Pair.Secondary + "\nRate: " + _fs(rate) + "\nAmount: " + _fs(amount))
+	if Conf.Key != "" && Conf.Secret != "" {
+		form := get_body()
+		form.Add("pairing", _is(pair))
+		form.Add("type", "buy")
+		form.Add("amount", _fs(amount))
+		form.Add("rate", _fs(rate))
+		rsp, err := http.Post(Conf.URL+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+		if err != nil {
+			_err("api_buy - Post - ", err.Error())
+			return
+		}
+		Bot[pair].Delay.Next_Buy = 300
+		Bot[pair].Delay.Next_Sell = Bot[pair].Delay.Next_Sell + 5
+		defer rsp.Body.Close()
+		ct, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			_err("api_buy - ioutil - ", err.Error())
+			return
+		}
+		fmt.Println(string(ct))
+		var dat UIOrder
+		if err := json.Unmarshal(ct, &dat); err != nil {
+			_err("api_buy - Unmarshal - ", err.Error())
+			return
+		}
+		Bot[pair].Delay.Next_Sell = Bot[pair].Delay.Next_Sell + 5
+		Bot[pair].Delay.Refresh_Order = 3
+		if dat.Success == true {
+			api_line("Buy - " + Bot[pair].Pair.Secondary + "\nRate: " + _fs(rate) + "\nAmount: " + _fs(amount))
+		}
 	}
 }
 
@@ -373,99 +350,104 @@ func api_sell(ignore bool, pair int64, amount float64, rate float64) {
 	Delay.Next_BuySell = 5
 	Bot[pair].Delay.Next_Sell = 60
 	Bot[pair].Delay.Next_Buy = 60
-
-	form := get_body()
-	form.Add("pairing", _is(pair))
-	form.Add("type", "sell")
-	form.Add("amount", _fs(amount))
-	form.Add("rate", _fs(rate))
-	rsp, err := http.Post(Conf.URL+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
-	if err != nil {
-		_err("api_sell - Post - ", err.Error())
-		return
-	}
-	Bot[pair].Delay.Next_Sell = 300
-	defer rsp.Body.Close()
-	ct, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		_err("api_sell - ioutil - ", err.Error())
-		return
-	}
-	fmt.Println(string(ct))
-	var dat UIOrder
-	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_sell - Unmarshal - ", err.Error())
-		return
-	}
-	Bot[pair].Delay.Next_Buy = 300
-	Bot[pair].Delay.Refresh_Order = 0
-	if dat.Success == true {
-		api_line("Sell - " + Bot[pair].Pair.Secondary + "\nRate: " + _fs(rate) + "\nAmount: " + _fs(amount))
+	if Conf.Key != "" && Conf.Secret != "" {
+		form := get_body()
+		form.Add("pairing", _is(pair))
+		form.Add("type", "sell")
+		form.Add("amount", _fs(amount))
+		form.Add("rate", _fs(rate))
+		rsp, err := http.Post(Conf.URL+"order", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
+		if err != nil {
+			_err("api_sell - Post - ", err.Error())
+			return
+		}
+		Bot[pair].Delay.Next_Sell = 300
+		defer rsp.Body.Close()
+		ct, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			_err("api_sell - ioutil - ", err.Error())
+			return
+		}
+		fmt.Println(string(ct))
+		var dat UIOrder
+		if err := json.Unmarshal(ct, &dat); err != nil {
+			_err("api_sell - Unmarshal - ", err.Error())
+			return
+		}
+		Bot[pair].Delay.Next_Buy = 300
+		Bot[pair].Delay.Refresh_Order = 0
+		if dat.Success == true {
+			api_line("Sell - " + Bot[pair].Pair.Secondary + "\nRate: " + _fs(rate) + "\nAmount: " + _fs(amount))
+		}
 	}
 }
 
 func api_cancel(pair int64, id int64) {
-	form := get_body()
-	form.Add("pairing", _is(pair))
-	form.Add("order_id", _is(id))
-	rsp, err := http.Post(Conf.URL+"cancel", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
-	if err != nil {
-		_err("api_cancel - Post - ", err.Error())
-		return
-	}
-	defer rsp.Body.Close()
-	ct, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		_err("api_cancel - ioutil - ", err.Error())
-		return
-	}
-	//	fmt.Println(string(ct))
-	var dat UIOrder
-	if err := json.Unmarshal(ct, &dat); err != nil {
-		_err("api_cancel - Unmarshal - ", err.Error())
-		return
-	}
-	for i := range Bot[pair].Order {
-		if Bot[pair].Order[i].ID == id {
-			Bot[pair].Order = append(Bot[pair].Order[:i], Bot[pair].Order[i+1:]...)
-			break
-		}
-	}
-	Bot[pair].Delay.Refresh_Order = 2
-	if dat.Success == true {
-
-	}
-}
-
-func api_line(msg string) {
-	if Conf.Line != "" {
-		client := &http.Client{}
-		form := url.Values{
-			"message": {msg},
-		}
-		req, err := http.NewRequest("POST", "https://notify-api.line.me/api/notify", bytes.NewBufferString(form.Encode()))
+	if Conf.Key != "" && Conf.Secret != "" {
+		form := get_body()
+		form.Add("pairing", _is(pair))
+		form.Add("order_id", _is(id))
+		rsp, err := http.Post(Conf.URL+"cancel", "application/x-www-form-urlencoded", bytes.NewBufferString(form.Encode()))
 		if err != nil {
-			_err("api_line - Post - ", err.Error())
-			return
-		}
-		req.Header.Add("Authorization", "Bearer "+Conf.Line)
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		rsp, err := client.Do(req)
-		if err != nil {
-			_err("api_line - Header - ", err.Error())
+			_err("api_cancel - Post - ", err.Error())
 			return
 		}
 		defer rsp.Body.Close()
 		ct, err := ioutil.ReadAll(rsp.Body)
 		if err != nil {
-			_err("api_line - ioutil - ", err.Error())
+			_err("api_cancel - ioutil - ", err.Error())
 			return
 		}
-		fmt.Println(string(ct))
-		var dat map[string]interface{}
+		//	fmt.Println(string(ct))
+		var dat UIOrder
 		if err := json.Unmarshal(ct, &dat); err != nil {
-			_err("api_line - Unmarshal - ", err.Error())
+			_err("api_cancel - Unmarshal - ", err.Error())
 			return
+		}
+		for i := range Bot[pair].Order {
+			if Bot[pair].Order[i].ID == id {
+				Bot[pair].Order = append(Bot[pair].Order[:i], Bot[pair].Order[i+1:]...)
+				break
+			}
+		}
+		Bot[pair].Delay.Refresh_Order = 2
+		if dat.Success == true {
+
+		}
+	}
+}
+
+func api_line(msg string) {
+	if Conf.Line != "" {
+		if Conf.Key != "" && Conf.Secret != "" {
+			client := &http.Client{}
+			form := url.Values{
+				"message": {msg},
+			}
+			req, err := http.NewRequest("POST", "https://notify-api.line.me/api/notify", bytes.NewBufferString(form.Encode()))
+			if err != nil {
+				_err("api_line - Post - ", err.Error())
+				return
+			}
+			req.Header.Add("Authorization", "Bearer "+Conf.Line)
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			rsp, err := client.Do(req)
+			if err != nil {
+				_err("api_line - Header - ", err.Error())
+				return
+			}
+			defer rsp.Body.Close()
+			ct, err := ioutil.ReadAll(rsp.Body)
+			if err != nil {
+				_err("api_line - ioutil - ", err.Error())
+				return
+			}
+			fmt.Println(string(ct))
+			var dat map[string]interface{}
+			if err := json.Unmarshal(ct, &dat); err != nil {
+				_err("api_line - Unmarshal - ", err.Error())
+				return
+			}
 		}
 	}
 }
@@ -485,13 +467,6 @@ func api_bittrex() {
 	}
 	if bitt.Success == true {
 		mk := map[string]string{"USDT-BTC": "BTC", "USDT-ETH": "ETH", "USDT-DASH": "DAS", "USDT-XRP": "XRP", "USDT-OMG": "OMG"}
-		CN := map[string]int64{"BTC": 1, "ETH": 21, "DAS": 22, "XRP": 25, "OMG": 26}
-
-		n := time.Now()
-		if loc, err := time.LoadLocation("Asia/Bangkok"); err == nil {
-			n = n.In(loc)
-		}
-		now := strconv.Itoa(n.Hour()) + ":" + strconv.Itoa(n.Minute())
 		Bittrex = map[string]GBittrex{}
 		for i := range bitt.Result {
 			var m = bitt.Result[i]
@@ -505,18 +480,6 @@ func api_bittrex() {
 					Order_Buy:  m.Order_Buy,
 					Order_Sell: m.Order_Sell,
 				}
-				var is = CN[market]
-				if Bot[is].Graph.Bittrex_Time != now {
-					if Bot[is].Graph.Bittrex_Last > 0 {
-						Bot[is].Graph.Bittrex = append(Bot[is].Graph.Bittrex, Bot[is].Graph.Bittrex_Last)
-						l := len(Bot[is].Graph.Bittrex)
-						if l > 60 {
-							Bot[is].Graph.Bittrex = Bot[is].Graph.Bittrex[l-60:]
-						}
-					}
-					Bot[is].Graph.Bittrex_Time = now
-				}
-				Bot[is].Graph.Bittrex_Last = m.Price * USDTHB.Rate.THB
 			}
 		}
 	}

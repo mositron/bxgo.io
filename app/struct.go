@@ -24,7 +24,6 @@ type ABot struct {
 	Sims     []ASims
 	Delay    ADelay
 	Min_Sell float64
-	Graph    AGraph
 }
 
 type AUSDTHB struct {
@@ -33,30 +32,6 @@ type AUSDTHB struct {
 	Rate struct {
 		THB float64 `json:"THB"`
 	} `json:"rates"`
-}
-
-type ACoin struct {
-	BCH float64
-	BTC float64
-	DAS float64
-	DOG float64
-	ETH float64
-	FTC float64
-	GNO float64
-	HYP float64
-	LTC float64
-	NMC float64
-	OMG float64
-	PND float64
-	PPC float64
-	QRK float64
-	REP float64
-	THB float64
-	XCN float64
-	XPM float64
-	XPY float64
-	XRP float64
-	ZEC float64
 }
 
 type AConfig struct {
@@ -103,18 +78,6 @@ type ATrend struct {
 	DOWN_AVG_10   float64
 	DOWN_SUM_10   float64
 	Price_AVG_10  float64
-}
-
-type AGraph struct {
-	BX            []float64
-	BX_Last       float64
-	BX_Time       string
-	Bittrex       []float64
-	Bittrex_Last  float64
-	Bittrex_Time  string
-	Bitfinex      []float64
-	Bitfinex_Last float64
-	Bitfinex_Time string
 }
 
 type AList struct {

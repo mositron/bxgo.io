@@ -1,6 +1,7 @@
 body,th,td{font-size:14px;font-family:'Kanit';}
 body{background:#191919;color:#bbb;line-height:1.6em;}
 strong{font-weight:normal;display:inline-block;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;float:left;}
+.trend strong{width:100px;}
 em{color:#777;font-style:normal;}
 em span{color:#999;}
 
@@ -19,7 +20,7 @@ em span{color:#999;}
 .navbar div.nav-link{text-align:right;}
 .navbar .nav-link{padding:10px 15px !important;}
 .navbar .nav-link hr{color:#000;height:0px;width:100%;border:none;margin:3px 0px;border-top:1px solid #000;border-bottom:1px solid #161616;}
-.navbar a.nav-link{width:180px;}
+.navbar a.nav-link{width:160px;}
 .navbar a.nav-link:hover{background:#222;}
 .navbar small{color:#444;font-size:12px}
 .navbar small span{color:#888;font-size:14px}
@@ -32,6 +33,10 @@ em span{color:#999;}
 .line{height:0px;border-top:1px solid #080808;border-bottom:1px solid #202020;margin:20px 0px 15px;}
 .line>span{display:inline-block;vertical-align:middle;margin:-14px 15px;padding:2px 10px;background:#191919;font-size:16px;color:#5b3712}
 .line>small{float:right;margin:-12px 0px;background:#191919;padding:0px 5px 0px 10px;font-size:12px;color:#777;}
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active{background:#000;border-color:#000;}
+#nav-curr{border-color:#000;}
+#nav-curr a{color:#555;}
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover{background:#000;border-color:#000;}
 /*
 .line1{border-left:1px solid #090909;border-top:1px solid #090909;border-right:1px solid #262626;border-bottom:1px solid #262626;margin:5px 0px 0px;background:#111;}
 .line1>span{display:inline-block;vertical-align:middle;margin:0px 7px;}

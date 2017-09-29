@@ -10,12 +10,6 @@ func main() {
 	VERSION = "0.5.2"
 	log.SetFlags(0)
 	LoadIni()
-	if Conf.Key == "" || Conf.Secret == "" {
-		_tn("set Conf.Key/Conf.Secret.")
-		for {
-			time.Sleep(time.Second)
-		}
-	}
 	USDTHB = AUSDTHB{}
 	Bitfinex = map[string][]float64{}
 	Bittrex = map[string]GBittrex{}

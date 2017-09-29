@@ -1,10 +1,14 @@
 var delay=1;
-var tmr,tmn;
+var tmr,tmn,tmg;
 var THB=0;
 var currency='THB';
+var curr='thb';
 var data;
 var loaded=false;
 var pass='';
+var coin='';
+var market={'bx':'bx.in.th'};
+var last_coin='';
 function network(s){
   var t=$('.href_'+s.replace('/',''));
   if(t.length>0) {
@@ -15,6 +19,11 @@ function network(s){
     loaded=false;
     $('#navbarNetwork .active').removeClass('active');
     t.addClass('active');
+    if(tmg)
+    {
+      clearInterval(tmg);
+      tmg='';
+    }
   }
 }
 function sendorder(t){
@@ -52,7 +61,6 @@ function _getData(){
       $('#time').html(d.getDate()+'/'+('0'+(d.getMonth()+1)).substr(-2)+'/'+d.getFullYear()+' '+('0'+d.getHours()).substr(-2)+':'+('0'+d.getMinutes()).substr(-2)+':'+('0'+d.getSeconds()).substr(-2));
       THB = data.usdthb.rates.THB;
       $('.usdthb').html('1 USD = '+THB+' THB');
-      //var tmp='<li class="nav-item"><div class="nav-link">BX.in.th<br>Bitfinex<br>Bittrex<hr>Bitfinex<br>Bittrex</div></li>';
       var tmp='';
       for(var i=0;i<data.sort.length;i++){
         var k,v;
@@ -74,11 +82,12 @@ function _getData(){
             var ps='(<span class="bth-change '+(p>0?'green">+':'red">')+_num(_fs(p))+'</span>%)';
             var ps2='(<span class="btt-change '+(p2>0?'green">+':'red">')+_num(_fs(p2))+'</span>%)';
             tmp='<li class="nav-item" id="nav-'+v.primary+'-'+v.secondary+'"><a class="nav-link href_'+v.secondary+(pair==k?' active':'')+'" href="/'+v.secondary+'" data-pair="'+k+'">'+
-            v.primary+'/'+v.secondary+': <span class="'+v.primary+'_'+v.secondary+'">'+_num(_fs(v.price))+'</span><br>'+
-            'THB/'+v.secondary+': <span class="THB2_'+v.secondary+'">'+_num(_fs(bth*THB))+'</span> '+ps+'<br>'+
-            'THB/'+v.secondary+': <span class="THB3_'+v.secondary+'">'+_num(_fs(btt*THB))+'</span> '+ps2+'<hr>'+
-            'USD/'+v.secondary+': <span class="USD_'+v.secondary+'">'+_num(_fs(bth))+'</span><br>'+
-            'USD/'+v.secondary+': <span class="USD2_'+v.secondary+'">'+_num(_fs(btt))+'</span>'+
+            v.secondary+'<br>'+
+            v.primary+': <span class="'+v.primary+'_'+v.secondary+'">'+_num(_fs(v.price))+'</span><br>'+
+            'THB: <span class="THB2_'+v.secondary+'">'+_num(_fs(bth*THB))+'</span> '+ps+'<br>'+
+            'THB: <span class="THB3_'+v.secondary+'">'+_num(_fs(btt*THB))+'</span> '+ps2+'<hr>'+
+            'USD: <span class="USD_'+v.secondary+'">'+_num(_fs(bth))+'</span><br>'+
+            'USD: <span class="USD2_'+v.secondary+'">'+_num(_fs(btt))+'</span>'+
             '</a></li>';
             $('#pair').append(tmp);
           }
@@ -97,6 +106,12 @@ function _getData(){
           wl.html(k+': '+(v.available?_num(v.available):0)+' <em>(<span>'+_num(v.total)+'</span>)</em>');
         }
       });
+      coin=data.pair.secondary_currency;
+      if(!tmg)
+      {
+        tmg=setInterval(_getGraph,5000)
+        _getGraph();
+      }
       var cur=currency+'/'+data.pair.secondary_currency;
       document.title = _num(_fs(data.pair.last_price)) + ' : '+currency+'/'+data.pair.secondary_currency+' - BXGo v. '+ver;
       $('#pairing').html(data.pair.secondary_currency);
@@ -111,29 +126,6 @@ function _getData(){
       $('#bx_sell').html(_num(_fs(data.pair.orderbook.asks.highbid)));
       $('#bx_sell_vol').html(_num(data.pair.orderbook.asks.volume));
 
-      var ar,ml=0;
-      if(!(ar=data.graph.BX))ar=[];
-      ar.push(data.graph.BX_Last);
-      window.LineConfig.data.datasets[0].data=ar;
-      if(ar.length>ml)ml=ar.length;
-      if(!(ar=data.graph.Bitfinex))ar=[];
-      ar.push(data.graph.Bitfinex_Last);
-      window.LineConfig.data.datasets[1].data=ar;
-      if(ar.length>ml)ml=ar.length;
-      if(!(ar=data.graph.Bittrex))ar=[];
-      ar.push(data.graph.Bittrex_Last);
-      window.LineConfig.data.datasets[2].data=ar;
-      if(ar.length>ml)ml=ar.length;
-      if(window.LineChart)
-      {
-        var l=[];
-        for(var i=0;i<ml-1;i++){
-          l.push('');
-        }
-        l.push(data.graph.BX_Time);
-        window.LineConfig.data.labels=l;
-        window.LineChart.update();
-      }
       var bfn = data.bitfinex[data.pair.secondary_currency];
       if(bfn){
         $('#bfn_price').html(_num(_fs(bfn[6]*THB)));
@@ -230,11 +222,15 @@ function _getData(){
 }
 function _fs(s)
 {
-  if(s && !isNaN(s) && s.toString().indexOf('.') != -1)
+  if(s && !isNaN(s) && s.toString().indexOf('.')>0)
   {
-    return s.toFixed(currency=='THB'?2:8);
+    if(s.toFixed)s=s.toFixed(2);
+    var t=s.toString().split('.');
+    return t[0]+'.'+(t[1]?t[1]+'0':'00').substr(0,2);
+  }else if(s && !isNaN(s)){
+    return s+'.00';
   }
-  return s?s:'';
+  return s?s:'0.00';
 }
 function _color(o,i)
 {
@@ -250,10 +246,10 @@ function _color(o,i)
 function _calc(p){
   var margin = (p*(data.conf.Margin/100)),
     sell = margin+p,
-    coin = data.conf.Budget/p,
-    profit = coin*margin,
+    amount = data.conf.Budget/p,
+    profit = amount*margin,
     diff = (p*(data.conf.Cycle/100));
-  return {'buy':p,'sell':sell,'margin':margin,'coin':coin,'profit':profit,'diff':diff};
+  return {'buy':p,'sell':sell,'margin':margin,'amount':amount,'profit':profit,'diff':diff};
 }
 function _sim(type,rate,amount)
 {
@@ -293,7 +289,17 @@ function _num(x){
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 }
-
+function _curr(t)
+{
+  $('#nav-curr .nav-link').removeClass('active');
+  $('.nav-'+t).addClass('active');
+  curr=t;
+  if(tmg)
+  {
+    clearInterval(tmg);
+    tmg='';
+  }
+}
 var nav = {
   tmp:{},uparse:/^(((([^:\/#\?]+:)?(?:(\/\/)((?:(([^:@\/#\?]+)(?:\:([^:@\/#\?]+))?)@)?(([^:\/#\?\]\[]+|\[[^\/\]@#?]+\])(?:\:([0-9]+))?))?)?)?((\/?(?:[^\/\?#]+\/+)*)([^\?#]*)))?(\?[^#]+)?)(#.*)?/,
   load:function(){
@@ -345,6 +351,58 @@ function order_type(){
     $('#amount_type').html(data.pair.secondary_currency);
   }
 }
+function _getGraph(){
+  if(!coin)return;
+  jQuery.ajax({
+    type: "GET",
+    url: 'https://bxgo.io/ajax/graph?coin='+coin+'&callback=?',
+    dataType: "jsonp",
+    success: function(data){
+      var d = new Date,v;
+      var THB = data.rate.THB;
+      var ar,av,ml=0,i=0,tm='';
+      $.each(data.market,function(k,v){
+        ar=[];
+        av=v.Price||[];
+        if(av.length>0){
+          for(var j=0;j<av.length;j++){
+            ar.push(_fs(av[j][3]*(curr=='thb'?THB:1)));
+          }
+          var price=_fs(v.Last[3]*(curr=='thb'?THB:1));
+          ar.push(price);
+          if(ar.length>ml)ml=ar.length;
+          if(coin!=last_coin){
+            last_coin=coin;
+            window.LineConfig.data.datasets=[];
+          }
+          if(!window.LineConfig.data.datasets[i]){
+            window.LineConfig.data.datasets.push({
+                label: market[k]?market[k]:k+'.com',
+                fill: false,
+                backgroundColor: window.chartColors[i],
+                borderColor: window.chartColors[i],
+                data: ar,
+            });
+          }else{
+            window.LineConfig.data.datasets[i].data=ar;
+          }
+          tm=v.Time;
+          i++;
+        }
+      });
+      var l=[];
+      for(var i=0;i<ml-1;i++){
+        l.push('');
+      }
+      l.push(tm);
+      window.LineConfig.data.labels=l;
+      window.LineChart.update();
+
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown){}
+  });
+}
+
 $(window).on('popstate',function(e){nav.popstate(e);});
 $(function(){
   tmr=setInterval(_getData,delay*1000)
@@ -370,42 +428,23 @@ $(function(){
   });
   nav.load();
 
-  window.chartColors={red:'rgba(255,99,132,0.5)',orange:'rgba(255,159,64,0.5)',yellow:'rgba(255,205,86,0.5)',green:'rgba(75,192,192,0.5)',blue:'rgba(54,162,235,0.5)',purple:'rgba(153,102,255,0.5)'};
+  window.chartColors=['rgba(255,99,132,0.5)','rgba(255,159,64,0.5)','rgba(255,205,86,0.5)','rgba(75,192,192,0.5)','rgba(54,162,235,0.5)','rgba(153,102,255,0.5)'];
   window.LineConfig = {
       type: 'line',
       data: {
-          //labels: ["January", "February", "March", "April", "May", "June", "July"],
           labels:[],
-          datasets: [{
-              label: "BX.in.th",
-              backgroundColor: window.chartColors.red,
-              borderColor: window.chartColors.red,
-              data: [],
-              fill: false,
-          },{
-              label: "Bitfinex.com",
-              fill: false,
-              backgroundColor: window.chartColors.orange,
-              borderColor: window.chartColors.orange,
-              data: [],
-          },{
-              label: "Bittrex.com",
-              fill: false,
-              backgroundColor: window.chartColors.blue,
-              borderColor: window.chartColors.blue,
-              data: [],
-          }]
+          datasets: []
       },
       options: {
           responsive: true,
           maintainAspectRatio:false,
-          elements: { point: { radius: 0 } },
+          elements:{point:{radius:0}},
           tooltips: {
               mode: 'index',
               intersect: false,
               callbacks: {
                   label: function(tooltipItem, data) {
-                      return Number(tooltipItem.yLabel).toLocaleString('en');
+                      return data.datasets[tooltipItem.datasetIndex].label+' : '+_fs(Number(tooltipItem.yLabel).toLocaleString('en'));
                   }
               }
           },
@@ -414,24 +453,24 @@ $(function(){
               intersect: true
           },
           scales: {
-              xAxes: [{
-                  display: true,
-                  gridLines:{display:true,drawBorder:true,drawOnChartArea:false,},
-                  ticks: {
-                    autoSkip: true,
-                    maxRotation: 0,
-                    minRotation: 0
-                  }
-              }],
-              yAxes: [{
-                  display: true,
-                  gridLines:{display:true,drawBorder:true,drawOnChartArea:false,},
-                  ticks: {
-                      callback: function (value) {
-                          return Number(value).toLocaleString('en');
-                      }
-                  }
-              }]
+            xAxes: [{
+              display: true,
+              gridLines:{display:true,drawBorder:true,drawOnChartArea:false,},
+              ticks: {
+                autoSkip: true,
+                maxRotation: 0,
+                minRotation: 0
+              }
+            }],
+            yAxes: [{
+              display: true,
+              gridLines:{display:true,drawBorder:true,drawOnChartArea:false,},
+              ticks: {
+                callback: function (value) {
+                  return Number(value).toLocaleString('en');
+                },
+              }
+            }]
           }
       }
   };
