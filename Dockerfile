@@ -14,5 +14,5 @@ EXPOSE $BXGO_PORT
 
 CMD ["/go/bin/app"]
 
-#docker build -t bxgo /var/www/bxgo/ --no-cache=true
-#docker run --name bxgo -p 8000:8000 -v /var/www/bxgo:/go/src/app -e BXGO_PORT="8000" --restart=always bxgo
+#docker build -t bxgo-trade /var/www/bxgo.trade/ --no-cache=true
+#docker run --name bxgo -p 8000:8000 -v /var/www/bxgo.trade:/go/src/app -e BXGO_PORT="8000" --restart=always bxgo
